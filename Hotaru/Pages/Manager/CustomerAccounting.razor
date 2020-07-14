@@ -1,0 +1,152 @@
+﻿@page "/manager/customeraccounting"
+@layout Hotaru.Shared.LayOut.ManagerLayout
+
+@using DataAccessLibrary;
+@using DataAccessLibrary.Models;
+@using Hotaru.DisplayModels;
+
+@inject IUserData UserDB;
+@inject IReservationData ReservationDB;
+@inject IPaymentData PaymentDB;
+@inject IRoomData RoomDB;
+@inject IRoomTypeData RoomTypeDB;
+
+<div class="main">
+    <div class="row">
+        <div class="col-4">
+            <BSCard CardType="CardType.Card">
+
+                <BSCard CardType="CardType.Image" VerticalAlignment="VerticalAlignment.Top" src="https://image.shutterstock.com/image-vector/silhouette-people-unknown-male-person-260nw-1372192277.jpg" alt="Card image cap" />
+
+                <BSCard CardType="CardType.Body">
+                    <BSCard CardType="CardType.Title">@user.User_FirstName</BSCard>
+                    <BSCard CardType="CardType.Title">@user.User_LastName</BSCard>
+                    <BSCard CardType="CardType.Subtitle">@user.User_EmailAddress</BSCard>
+                    <BSCard CardType="CardType.Subtitle">@user.User_PhoneNumber</BSCard>
+                    <BSCard CardType="CardType.Subtitle">@user.User_Gender</BSCard>
+                    <BSCard CardType="CardType.Subtitle">@user.User_Birthday</BSCard>
+                </BSCard>
+
+            </BSCard>
+        </div>
+        <div class="col-8 pd-20">
+            <h3>
+                <span class="mr-2 oi oi-calculator"></span>
+                Accounting
+            </h3>
+            <div class="row">
+                <div class="col-12 pb-3">
+                    Reserve Date:
+                </div>
+                <div class="col-8 pb-3">
+                    <BSBasicInput InputType="InputType.Date" Value="reservation.Reservation_ReserveDate" IsDisabled="true"></BSBasicInput>
+                </div>
+                <div class="col-12 pb-3">
+                    Start Date:
+                </div>
+                <div class="col-8 pb-3">
+                    <BSBasicInput InputType="InputType.Date" Value="reservation.Reservation_StartDate" IsDisabled="true"></BSBasicInput>
+                </div>
+                <div class="col-12 pb-3">
+                    End Date:
+                </div>
+                <div class="col-8 pb-3">
+                    <BSBasicInput InputType="InputType.Date" Value="reservation.Reservation_EndDate" IsDisabled="true"></BSBasicInput>
+                </div>
+                <div class="col-12 pb-3">
+                    Room Number:
+                </div>
+                <div class="col-8 pb-3">
+                    <BSBasicInput InputType="InputType.Text" IsDisabled="true" Value="room.Room_Number"></BSBasicInput>
+                </div>
+                <div class="col-12 pb-3">
+                    Room Type:
+                </div>
+                <div class="col-8 pb-3">
+                    <BSBasicInput InputType="InputType.Text" IsDisabled="true" Value="roomType.RoomType_Name"></BSBasicInput>
+                </div>
+                <div class="col-12 pb-3">
+                    Room Price:
+                </div>
+                <div class="col-8 pb-3">
+                    <BSBasicInput InputType="InputType.Text" IsDisabled="true" Value="roomType.RoomType_Price"></BSBasicInput>
+                </div>
+                <div class="col-12 pb-3">
+                    Total Amount:
+                </div>
+                <div class="col-8 pb-3">
+                    <BSBasicInput InputType="InputType.Text" IsDisabled="true" Value="payment.Payment_Total"></BSBasicInput>
+                </div>
+                <div class="col-12 pb-3">
+                    Description:
+                </div>
+                <div class="col-8 pb-3">
+                    <BSBasicInput InputType="InputType.Text" IsDisabled="true" Value="reservation.Reservation_Description"></BSBasicInput>
+                </div>
+                <BSButton Color="Color.Info" Size="Size.Large" Class="float-right">Alert to customer</BSButton>
+            </div>
+        </div>
+    </div>
+</div>
+@code {
+
+    ReservationModel reservation = new ReservationModel();
+    PaymentModel payment = new PaymentModel();
+    UserModel user = new UserModel();
+    RoomModel room = new RoomModel();
+    RoomTypeModel roomType = new RoomTypeModel();
+
+    protected override async Task OnInitializedAsync()
+    {
+        List<ReservationModel> reservations = await ReservationDB.GetReservations();
+        List<PaymentModel> payments = await PaymentDB.GetPayments();
+        List<UserModel> users = await UserDB.GetUsers();
+        List<RoomModel> rooms = await RoomDB.GetRooms();
+        List<RoomTypeModel> roomTypes = await RoomTypeDB.GetRoomTypes();
+
+        for (int index = 0; index < reservations.Count; index++)
+        {
+            if (reservations[index].Reservation_ID == CurrentInfo.Reservation_ID)
+            {
+                reservation = reservations[index];
+                break;
+            }
+        }
+
+        for (int index = 0; index < payments.Count; index++)
+        {
+            if (payments[index].Reservation_ID == reservation.Reservation_ID)
+            {
+                payment = payments[index];
+                break;
+            }
+        }
+
+        for (int index = 0; index < users.Count; index++)
+        {
+            if (users[index].User_ID == reservation.User_ID)
+            {
+                user = users[index];
+                break;
+            }
+        }
+
+        for (int index = 0; index < rooms.Count; index++)
+        {
+            if (rooms[index].Hotel_ID == reservation.Hotel_ID)
+            {
+                room = rooms[index];
+                break;
+            }
+        }
+
+        for (int roomTypeIndex = 0; roomTypeIndex < roomTypes.Count; roomTypeIndex++)
+        {
+            if (roomTypes[roomTypeIndex].RoomType_ID == room.RoomType_ID)
+            {
+                roomType = roomTypes[roomTypeIndex];
+                break;
+            }
+        }
+    }
+}

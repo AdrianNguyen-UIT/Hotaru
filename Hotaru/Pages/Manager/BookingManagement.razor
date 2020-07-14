@@ -1,0 +1,369 @@
+﻿@page "/manager/bookingstatus"
+@page "/manager/bookingstatus/{pageId:int}"
+@layout Hotaru.Shared.LayOut.ManagerLayout
+@inject NavigationManager nvg
+
+@using DataAccessLibrary;
+@using DataAccessLibrary.Models;
+@using Hotaru.DisplayModels;
+@inject IReservationData ReservationDB;
+@inject IPaymentData PaymentDB;
+@inject IUserData UserDB;
+@inject IRoomData RoomDB;
+
+<div class="main">
+    <div class="col-12">
+        @if ((PageId != model.MaxPages - 1) || (model.MaxObject % model.ObjectEachPage == 0))
+        {
+            for (int i = 0; i < model.ObjectEachPage / 2; i++)
+            {
+                int object1 = PageId * model.ObjectEachPage + 1 + i * 2;
+                int object2 = object1 + 1;
+                <div class="row">
+                    @if (object1 < reservations.Count && !payments[object1].Payment_Pay)
+                    {
+                        <div class="media pb-5 col-6">
+                            <img class="mr-3 img-thumbnail" src="https://image.shutterstock.com/image-vector/silhouette-people-unknown-male-person-260nw-1372192277.jpg" alt="Generic placeholder image" style="width:200px;height:250px;">
+                            <div class="media-body">
+                                <label>User Name: </label>
+                                <h3 class="mt-0"> @users[object1].User_FirstName @users[object1].User_LastName</h3>
+                                <label>Room Name:</label>
+                                <p>@rooms[object1].Room_Number</p>
+                                <label>Reserve Date:</label>
+                                <BSBasicInput InputType="InputType.Date" Value="reservations[object1].Reservation_ReserveDate" IsDisabled="true"></BSBasicInput>
+                                <label>Start Date:</label>
+                                <BSBasicInput InputType="InputType.Date" Value="reservations[object1].Reservation_StartDate" IsDisabled="true"></BSBasicInput>
+                                <label>End Date:</label>
+                                <BSBasicInput InputType="InputType.Date" Value="reservations[object1].Reservation_EndDate" IsDisabled="true"></BSBasicInput>
+                                <BSButton Class="p-3" Color=Color.Primary Size=Size.ExtraSmall OnClick="@(() => Detail(object1))">Detail</BSButton>
+                                <BSButton Class="p-3" Color=Color.Danger Size=Size.ExtraSmall OnClick="@(() => Decline(object1))">Decline</BSButton>
+                            </div>
+                        </div>
+                    }
+                    @if (object2 < reservations.Count && !payments[object2].Payment_Pay)
+                    {
+                        <div class="media pb-5 col-6">
+                            <img class="mr-3 img-thumbnail" src="https://image.shutterstock.com/image-vector/silhouette-people-unknown-male-person-260nw-1372192277.jpg" alt="Generic placeholder image" style="width:200px;height:250px;">
+                            <div class="media-body">
+                                <label>User Name: </label>
+                                <h3 class="mt-0"> @users[object2].User_FirstName @users[object2].User_LastName</h3>
+                                <label>Room Name:</label>
+                                <p>@rooms[object2].Room_Number</p>
+                                <label>Reserve Date:</label>
+                                <BSBasicInput InputType="InputType.Date" Value="reservations[object2].Reservation_ReserveDate" IsDisabled="true"></BSBasicInput>
+                                <label>Start Date:</label>
+                                <BSBasicInput InputType="InputType.Date" Value="reservations[object2].Reservation_StartDate" IsDisabled="true"></BSBasicInput>
+                                <label>End Date:</label>
+                                <BSBasicInput InputType="InputType.Date" Value="reservations[object2].Reservation_EndDate" IsDisabled="true"></BSBasicInput>
+                                <BSButton Class="p-3" Color=Color.Primary Size=Size.ExtraSmall OnClick="@(() => Detail(object2))">Detail</BSButton>
+                                <BSButton Class="p-3" Color=Color.Danger Size=Size.ExtraSmall OnClick="@(() => Decline(object2))">Decline</BSButton>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        }
+        else
+        {
+            for (int i = 0; i < (model.MaxObject % model.ObjectEachPage + 1) / 2; i++)
+            {
+                int object1 = PageId * model.ObjectEachPage + 1 + i * 2;
+                int object2 = object1 + 1;
+                <div class="row">
+                    @if (object1 < reservations.Count && !payments[object1].Payment_Pay)
+                    {
+                        <div class="media pb-5 col-6">
+                            <img class="mr-3 img-thumbnail" src="https://image.shutterstock.com/image-vector/silhouette-people-unknown-male-person-260nw-1372192277.jpg" alt="Generic placeholder image" style="width:200px;height:250px;">
+                            <div class="media-body">
+                                <label>User Name: </label>
+                                <h3 class="mt-0"> @users[object1].User_FirstName @users[object1].User_LastName</h3>
+                                <label>Room Name:</label>
+                                <p>@rooms[object1].Room_Number</p>
+                                <label>Reserve Date:</label>
+                                <BSBasicInput InputType="InputType.Date" Value="reservations[object1].Reservation_ReserveDate" IsDisabled="true"></BSBasicInput>
+                                <label>Start Date:</label>
+                                <BSBasicInput InputType="InputType.Date" Value="reservations[object1].Reservation_StartDate" IsDisabled="true"></BSBasicInput>
+                                <label>End Date:</label>
+                                <BSBasicInput InputType="InputType.Date" Value="reservations[object1].Reservation_EndDate" IsDisabled="true"></BSBasicInput>
+                                <BSButton Class="p-3" Color=Color.Primary Size=Size.ExtraSmall OnClick="@(() => Detail(object1))">Detail</BSButton>
+                                <BSButton Class="p-3" Color=Color.Danger Size=Size.ExtraSmall OnClick="@(() => Decline(object1))">Decline</BSButton>
+                            </div>
+                        </div>
+                    }
+                    @if (object2 < reservations.Count && !payments[object2].Payment_Pay)
+                    {
+                        <div class="media pb-5 col-6">
+                            <img class="mr-3 img-thumbnail" src="https://image.shutterstock.com/image-vector/silhouette-people-unknown-male-person-260nw-1372192277.jpg" alt="Generic placeholder image" style="width:200px;height:250px;">
+                            <div class="media-body">
+                                <label>User Name: </label>
+                                <h3 class="mt-0"> @users[object2].User_FirstName @users[object2].User_LastName</h3>
+                                <label>Room Name:</label>
+                                <p>@rooms[object2].Room_Number</p>
+                                <label>Reserve Date:</label>
+                                <BSBasicInput InputType="InputType.Date" Value="reservations[object2].Reservation_ReserveDate" IsDisabled="true"></BSBasicInput>
+                                <label>Start Date:</label>
+                                <BSBasicInput InputType="InputType.Date" Value="reservations[object2].Reservation_StartDate" IsDisabled="true"></BSBasicInput>
+                                <label>End Date:</label>
+                                <BSBasicInput InputType="InputType.Date" Value="reservations[object2].Reservation_EndDate" IsDisabled="true"></BSBasicInput>
+                                <BSButton Class="p-3" Color=Color.Primary Size=Size.ExtraSmall OnClick="@(() => Detail(object2))">Detail</BSButton>
+                                <BSButton Class="p-3" Color=Color.Danger Size=Size.ExtraSmall OnClick="@(() => Decline(object2))">Decline</BSButton>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        }
+    </div>
+    <BSPagination Alignment="Alignment.Center">
+        <BSPaginationItem IsDisabled="IsFirstPage()">
+
+            <BSPaginationLink Href="@URLPage(PageId-1)" PaginationLinkType="PaginationLinkType.PreviousText"></BSPaginationLink>
+
+        </BSPaginationItem>
+        @if (model.MaxPages < 10)
+            for (int i = 0; i < model.MaxPages; i++)
+            {
+                if (PageId == i)
+                {
+                    int numPage = i;
+                    <BSPaginationItem IsActive="true">
+
+                        <BSPaginationLink Href="@URLPage(numPage)">@numPage</BSPaginationLink>
+
+                    </BSPaginationItem>
+                }
+                else
+                {
+                    int numPage = i;
+                    <BSPaginationItem IsActive="false">
+
+                        <BSPaginationLink Href="@URLPage(numPage)">@numPage</BSPaginationLink>
+
+                    </BSPaginationItem>
+                }
+            }
+        else
+        {
+            if (PageId < 10)
+            {
+                for (int i = 0; i < 10; i++)
+                {
+                    if (PageId == i)
+                    {
+                        int numPage = i;
+                        <BSPaginationItem IsActive="true">
+
+                            <BSPaginationLink Href="@URLPage(numPage)">@numPage</BSPaginationLink>
+
+                        </BSPaginationItem>
+                    }
+                    else
+                    {
+                        int numPage = i;
+                        <BSPaginationItem IsActive="false">
+
+                            <BSPaginationLink Href="@URLPage(numPage)">@numPage</BSPaginationLink>
+
+                        </BSPaginationItem>
+                    }
+                }
+                <BSPaginationItem IsDisabled="true">
+
+                    <BSPaginationLink Href="">...</BSPaginationLink>
+
+                </BSPaginationItem>
+            }
+            else
+            {
+                if (PageId != model.MaxPages - 1)
+                {
+                    <BSPaginationItem IsDisabled="true">
+
+                        <BSPaginationLink Href="">...</BSPaginationLink>
+
+                    </BSPaginationItem>
+                    for (int i = PageId - 9; i < PageId + 1; i++)
+                    {
+                        if (PageId == i)
+                        {
+                            int numPage = i;
+                            <BSPaginationItem IsActive="true">
+
+                                <BSPaginationLink Href="@URLPage(numPage)">@numPage</BSPaginationLink>
+
+                            </BSPaginationItem>
+                        }
+                        else
+                        {
+                            int numPage = i;
+                            <BSPaginationItem IsActive="false">
+
+                                <BSPaginationLink Href="@URLPage(numPage)">@numPage</BSPaginationLink>
+
+                            </BSPaginationItem>
+                        }
+                    }
+                    <BSPaginationItem IsDisabled="true">
+
+                        <BSPaginationLink Href="">...</BSPaginationLink>
+
+                    </BSPaginationItem>
+                }
+                else
+                {
+                    <BSPaginationItem IsDisabled="true">
+
+                        <BSPaginationLink Href="">...</BSPaginationLink>
+
+                    </BSPaginationItem>
+                    for (int i = PageId - 9; i < PageId + 1; i++)
+                    {
+                        if (PageId == i)
+                        {
+                            int numPage = i;
+                            <BSPaginationItem IsActive="true">
+
+                                <BSPaginationLink Href="@URLPage(numPage)">@numPage</BSPaginationLink>
+
+                            </BSPaginationItem>
+                        }
+                        else
+                        {
+                            int numPage = i;
+                            <BSPaginationItem IsActive="false">
+
+                                <BSPaginationLink Href="@URLPage(numPage)">@numPage</BSPaginationLink>
+
+                            </BSPaginationItem>
+                        }
+                    }
+                }
+            }
+        }
+
+        <BSPaginationItem IsDisabled="IsFinalPage()">
+
+            <BSPaginationLink Href="@URLPage(PageId+1)" PaginationLinkType="PaginationLinkType.NextText"></BSPaginationLink>
+
+        </BSPaginationItem>
+
+    </BSPagination>
+</div>
+@code {
+
+    [Parameter]
+    public int PageId { get; set; }
+
+    Pagination model = new Pagination(1, 1);
+
+    List<ReservationModel> reservations = new List<ReservationModel>();
+    List<UserModel> users = new List<UserModel>();
+    List<RoomModel> rooms = new List<RoomModel>();
+    List<PaymentModel> payments = new List<PaymentModel>();
+    string URLPage(int numPage)
+    {
+        string temp = "/manager/bookingstatus/" + numPage.ToString();
+        return temp;
+    }
+
+    bool IsFirstPage()
+    {
+        if (PageId == 0) return true;
+        else return false;
+    }
+
+    bool IsFinalPage()
+    {
+        if (PageId == model.MaxPages - 1) return true;
+        else return false;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        reservations = await ReservationDB.GetReservations();
+        users = await UserDB.GetUsers();
+        rooms = await RoomDB.GetRooms();
+        payments = await PaymentDB.GetPayments();
+
+        List<ReservationModel> temptReservations = new List<ReservationModel>();
+        List<RoomModel> temptRooms = new List<RoomModel>();
+        List<UserModel> temptUsers = new List<UserModel>();
+        List<PaymentModel> temptPayments = new List<PaymentModel>();
+
+        for (int index = 0; index < reservations.Count; index++)
+        {
+            if (reservations[index].Hotel_ID == CurrentInfo.Hotel_ID)
+            {
+                if (temptReservations.Count == 0)
+                {
+                    temptReservations.Add(reservations[index]);
+                }
+                temptReservations.Add(reservations[index]);
+            }
+        }
+        reservations.Clear();
+        reservations = temptReservations;
+        model = new Pagination(temptReservations.Count, 8);
+
+        for (int reservationIndex = 0; reservationIndex < reservations.Count; reservationIndex++)
+        {
+            for (int roomIndex = 0; roomIndex < rooms.Count; roomIndex++)
+            {
+                if (rooms[roomIndex].Room_ID == reservations[reservationIndex].Room_ID)
+                {
+                    temptRooms.Add(rooms[roomIndex]);
+                }
+            }
+        }
+        rooms.Clear();
+        rooms = temptRooms;
+
+        for (int reservationIndex = 0; reservationIndex < reservations.Count; reservationIndex++)
+        {
+            for (int userIndex = 0; userIndex < users.Count; userIndex++)
+            {
+                if (users[userIndex].User_ID == reservations[reservationIndex].User_ID)
+                {
+                    temptUsers.Add(users[userIndex]);
+                }
+            }
+        }
+        users.Clear();
+        users = temptUsers;
+
+        for (int reservationIndex = 0; reservationIndex < reservations.Count; reservationIndex++)
+        {
+            for (int paymentIndex = 0; paymentIndex < payments.Count; paymentIndex++)
+            {
+                if (payments[paymentIndex].Reservation_ID == reservations[reservationIndex].Reservation_ID)
+                {
+                    temptPayments.Add(payments[paymentIndex]);
+                }
+            }
+        }
+        payments.Clear();
+        payments = temptPayments;
+    }
+
+
+    private async Task Decline(int num)
+    {
+        for (int index = 0; index < payments.Count; index++)
+        {
+            if (payments[index].Reservation_ID == reservations[num].Reservation_ID)
+            {
+                await PaymentDB.DeletePayment(payments[index]);
+                break;
+            }
+        }
+        await ReservationDB.DeleteReservation(reservations[num]);
+
+        await OnInitializedAsync();
+    }
+
+    private void Detail(int num)
+    {
+        CurrentInfo.Reservation_ID = reservations[num].Reservation_ID;
+        nvg.NavigateTo("manager/customeraccounting");
+    }
+}

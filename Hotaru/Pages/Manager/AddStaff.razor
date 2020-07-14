@@ -1,0 +1,186 @@
+﻿@page "/manager/addstaff"
+@inject NavigationManager nvg
+@layout Hotaru.Shared.LayOut.AuthLayout
+
+@using DataAccessLibrary;
+@using DataAccessLibrary.Models;
+@using Hotaru.DisplayModels;
+@inject IStaffData StaffDB;
+@inject ILoginData LoginDB;
+@inject IHotelEmployeeData HotelEmployeeDB;
+
+<div class="col-12 p-5">
+
+    @if (!string.IsNullOrWhiteSpace(alert))
+    {
+        <BSAlert Color="Color.Success">
+
+            @alert<span class="oi oi-circle-x ml-2" @onclick="CloseAlert"></span>
+
+        </BSAlert>
+    }
+
+    <BSForm Model="@newRegister" ValidateOnInit="false">
+
+        <DataAnnotationsValidator />
+
+        <BSFormGroup>
+
+            <BSLabel For="FirstNameInput">First Name</BSLabel>
+
+            <BSInput Id="FirstNameInput" InputType="InputType.Text" PlaceHolder="Enter First Name" @bind-Value="@newRegister.User_FirstName">First Name</BSInput>
+
+            <BSFormFeedback For="@(() => newRegister.User_FirstName)"></BSFormFeedback>
+
+        </BSFormGroup>
+
+        <BSFormGroup>
+
+            <BSLabel For="LastNameInput">Last Name</BSLabel>
+
+            <BSInput Id="LastNameInput" InputType="InputType.Text" PlaceHolder="Enter Last Name" @bind-Value="@newRegister.User_LastName">Last Name</BSInput>
+
+            <BSFormFeedback For="@(() => newRegister.User_LastName)"></BSFormFeedback>
+
+        </BSFormGroup>
+
+        <BSFormGroup>
+
+            <BSLabel For="EmailInput">Email</BSLabel>
+
+            <BSInput Id="EmailInput" InputType="InputType.Email" PlaceHolder="Enter Email Address" @bind-Value="@newRegister.User_EmailAddress">Email Address</BSInput>
+
+            <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
+
+            <BSFormFeedback For="@(() => newRegister.User_EmailAddress)"></BSFormFeedback>
+
+        </BSFormGroup>
+
+        <BSFormGroup>
+
+            <BSLabel For="PhoneInput">Phone Number</BSLabel>
+
+            <BSInput InputType="InputType.Tel" PlaceHolder="Phone Number" Id="PhoneInput" @bind-Value="@newRegister.User_PhoneNumber"></BSInput>
+
+            <BSFormFeedback For="@(() => newRegister.User_PhoneNumber)"></BSFormFeedback>
+
+        </BSFormGroup>
+
+        <BSFormGroup>
+            <BSLabel For="GenderInput">Gender</BSLabel>
+
+            <BSInput InputType="InputType.Select" Id="GenderInput" @bind-Value="@newRegister.User_Gender">
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
+            </BSInput>
+        </BSFormGroup>
+
+        <BSFormGroup>
+            <BSLabel For="BirthdayInput">Birthday</BSLabel>
+
+            <BSInput InputType="InputType.Date" Id="BirthdayInput" @bind-Value="@newRegister.User_Birthday"> </BSInput>
+
+            <BSFormFeedback For="@(() => newRegister.User_Birthday)"></BSFormFeedback>
+
+        </BSFormGroup>
+
+        <BSFormGroup>
+
+            <BSLabel For="UserNameInput">Username</BSLabel>
+
+            <BSInput Id="UserNameInput" InputType="InputType.Text" PlaceHolder="Enter Username" @bind-Value="@newRegister.User_UserName">Username</BSInput>
+
+            <BSFormFeedback For="@(() => newRegister.User_UserName)"></BSFormFeedback>
+
+        </BSFormGroup>
+
+        <BSFormGroup>
+
+            <BSLabel For="PasswordInput">Password</BSLabel>
+
+            <BSInput InputType="InputType.Password" PlaceHolder="Password" Id="PasswordInput" @bind-Value="@newRegister.User_Password"></BSInput>
+
+            <BSFormFeedback For="@(() => newRegister.User_Password)"></BSFormFeedback>
+
+        </BSFormGroup>
+
+        <BSFormGroup>
+
+            <BSLabel For="ConfirmPasswordInput">Confirm Password</BSLabel>
+
+            <BSInput InputType="InputType.Password" PlaceHolder="ConfirmPassword" Id="ConfirmPasswordInput" @bind-Value="@newRegister.User_ConfirmPassword"></BSInput>
+
+            <BSFormFeedback For="@(() => newRegister.User_ConfirmPassword)"></BSFormFeedback>
+
+        </BSFormGroup>
+
+        <BSButton Color="Color.Primary" IsBlock="true" @onclick="RegisterToHotaru">Register</BSButton>
+
+        <hr style="background-color: #99ffcc" />
+
+    </BSForm>
+
+</div>
+
+@code {
+    DisplayRegisterModel newRegister = new DisplayRegisterModel();
+    List<StaffModel> staffs = new List<StaffModel>();
+
+    string alert = string.Empty;
+
+    public async Task RegisterToHotaru()
+    {
+        StaffModel newStaff = new StaffModel
+        {
+            User_FirstName = newRegister.User_FirstName,
+            User_LastName = newRegister.User_LastName,
+            User_EmailAddress = newRegister.User_EmailAddress,
+            User_PhoneNumber = newRegister.User_PhoneNumber,
+            User_Gender = newRegister.User_Gender,
+            User_Birthday = newRegister.User_Birthday
+        };
+        await StaffDB.InsertStaff(newStaff);
+
+        staffs = await StaffDB.GetStaffs();
+
+        for (int index = 0; index < staffs.Count; index++)
+        {
+            if (staffs[index].User_FirstName == newStaff.User_FirstName
+                && staffs[index].User_LastName == newStaff.User_LastName
+                && staffs[index].User_EmailAddress == newStaff.User_EmailAddress
+                && staffs[index].User_PhoneNumber == newStaff.User_PhoneNumber
+                && staffs[index].User_Gender == newStaff.User_Gender
+                && staffs[index].User_Birthday == newStaff.User_Birthday)
+            {
+                LoginModel newLogin = new LoginModel
+                {
+                    Login_UserName = newRegister.User_UserName,
+                    Login_Password = newRegister.User_Password,
+                    User_ID = staffs[index].User_ID
+                };
+                await LoginDB.InsertLogin(newLogin);
+
+                HotelEmployeeModel hotelEmployee = new HotelEmployeeModel
+                {
+                    User_ID = staffs[index].User_ID,
+                    Hotel_ID = CurrentInfo.Hotel_ID
+                };
+                await HotelEmployeeDB.InsertEmployee(hotelEmployee);
+            }
+        }
+
+        alert = "Account has been create successfully";
+    }
+
+    public void CloseAlert()
+    {
+        alert = string.Empty;
+    }
+
+    public void nvgToLogin()
+    {
+        nvg.NavigateTo("/login");
+    }
+
+}

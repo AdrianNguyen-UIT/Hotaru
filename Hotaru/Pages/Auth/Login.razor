@@ -1,0 +1,147 @@
+﻿@page "/login"
+@inject NavigationManager nvg
+@layout Hotaru.Shared.LayOut.AuthLayout
+@using DataAccessLibrary;
+@using DataAccessLibrary.Models;
+@using Hotaru.DisplayModels;
+
+@inject ILoginData loginDB;
+@inject IManagerData managerDB;
+@inject IStaffData staffDB;
+@inject IUserData userDB;
+
+<div class="col-12 p-5">
+
+    @if (!string.IsNullOrWhiteSpace(alert))
+    {
+        <BSAlert Color="Color.Danger">
+
+            @alert<span class="oi oi-circle-x ml-2" @onclick="CloseAlert"></span>
+
+        </BSAlert>
+    }
+
+    <BSForm Model="@newLogin" ValidateOnInit="false">
+
+        <DataAnnotationsValidator />
+
+        <BSFormGroup>
+
+            <BSLabel For="UserNameInput">Username</BSLabel>
+
+            <BSInput Id="UserNameInput" InputType="InputType.Text" PlaceHolder="Enter Username" @bind-Value="@newLogin.Login_UserName">Username</BSInput>
+
+            <BSFormFeedback For="@(() => newLogin.Login_UserName)"></BSFormFeedback>
+
+        </BSFormGroup>
+
+        <BSFormGroup>
+
+            <BSLabel For="PasswordInput">Password</BSLabel>
+
+            <BSInput InputType="InputType.Password" PlaceHolder="Enter Password" Id="PasswordInput" @bind-Value="@newLogin.Login_Password"></BSInput>
+
+            <BSFormFeedback For="@(() => newLogin.Login_Password)"></BSFormFeedback>
+
+        </BSFormGroup>
+
+        <BSButton Color="Color.Primary" IsBlock="true" @onclick="LoginToHotaru">Login</BSButton>
+
+        <hr style="background-color: #99ffcc" />
+
+        <BSLabel>Dont have an account yet?</BSLabel>
+        <BSButton Color="Color.Secondary" IsBlock="true" @onclick="nvgToRegister">Register</BSButton>
+
+    </BSForm>
+
+</div>
+@code {
+
+    List<LoginModel> logins = new List<LoginModel>();
+    List<ManagerModel> managers = new List<ManagerModel>();
+    List<StaffModel> staffs = new List<StaffModel>();
+    List<UserModel> users = new List<UserModel>();
+    DisplayLoginModel newLogin = new DisplayLoginModel();
+    bool login = false;
+    string alert = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        logins = await loginDB.GetLogins();
+    }
+
+    public void nvgToRegister()
+    {
+        nvg.NavigateTo("/register");
+    }
+
+    private async Task LoginToHotaru()
+    {
+        for (int loginIndex = 0; loginIndex < logins.Count; loginIndex++)
+        {
+            if (login)
+            {
+                break;
+            }
+
+            if (newLogin.Login_UserName == logins[loginIndex].Login_UserName && newLogin.Login_Password == logins[loginIndex].Login_Password)
+            {
+                newLogin.User_ID = logins[loginIndex].User_ID;
+
+                managers = await managerDB.GetManagers();
+                for (int managerIndex = 0; managerIndex < managers.Count; managerIndex++)
+                {
+                    if (newLogin.User_ID == managers[managerIndex].User_ID)
+                    {
+                        CurrentInfo.Manager_ID = newLogin.User_ID;
+                        nvg.NavigateTo("/manager");
+                        login = true;
+                        break;
+                    }
+                }
+
+                if (!login)
+                {
+
+                    staffs = await staffDB.GetStaffs();
+                    for (int staffIndex = 0; staffIndex < staffs.Count; staffIndex++)
+                    {
+                        if (newLogin.User_ID == staffs[staffIndex].User_ID)
+                        {
+                            CurrentInfo.Staff_ID = newLogin.User_ID;
+                            nvg.NavigateTo("/staff");
+                            login = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (!login)
+                {
+
+                    users = await userDB.GetUsers();
+                    for (int userIndex = 0; userIndex < users.Count; userIndex++)
+                    {
+                        if (newLogin.User_ID == users[userIndex].User_ID)
+                        {
+                            CurrentInfo.User_ID = newLogin.User_ID;
+                            nvg.NavigateTo("/user");
+                            login = true;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        if (!login)
+        {
+            alert = "can not login, please check your username and password again";
+        }
+    }
+
+    public void CloseAlert()
+    {
+        alert = String.Empty;
+    }
+}

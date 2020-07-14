@@ -1,0 +1,356 @@
+﻿@page "/staff/customermanagement"
+@page "/staff/customermanagement/{pageId:int}"
+@layout Hotaru.Shared.LayOut.StaffLayout
+@inject NavigationManager nvg
+
+@using DataAccessLibrary;
+@using DataAccessLibrary.Models;
+@using Hotaru.DisplayModels;
+
+@inject IUserData UserDB;
+@inject IReservationData ReservationDB;
+
+<div class="main">
+    <div class="col-12">
+        @if ((PageId != model.MaxPages - 1) || (model.MaxObject % model.ObjectEachPage == 0))
+        {
+            for (int i = 0; i < model.ObjectEachPage / 2; i++)
+            {
+                int object1 = PageId * model.ObjectEachPage + 1 + i * 2;
+                int object2 = object1 + 1;
+                <div class="row">
+                    @if (object1 < users.Count)
+                    {
+                        <div class="media pb-5 col-6">
+                            <img class="mr-3 img-thumbnail" src="https://image.shutterstock.com/image-vector/silhouette-people-unknown-male-person-260nw-1372192277.jpg" alt="Generic placeholder image" style="width:200px;height:250px;">
+                            <div class="media-body">
+                                <label>Customer Name:</label>
+                                <p class="mt-0"> @users[object1].User_FirstName @users[object1].User_LastName</p>
+                                <label>Phone Number:</label>
+                                <p>@users[object1].User_PhoneNumber</p>
+                                <label>Email:</label>
+                                <p>@users[object1].User_EmailAddress</p>
+                                <label>Gender:</label>
+                                <p>@users[object1].User_Gender</p>
+                                <label>Birthday:</label>
+                                <p>@users[object1].User_Birthday.ToString()</p>
+                                <label>Total Reservations:</label>
+                                @{
+                                    int count = 0;
+                                    for (int index = 0; index < reservations.Count; index++)
+                                    {
+                                        if (reservations[index].User_ID == users[object1].User_ID)
+                                        {
+                                            ++count;
+                                        }
+                                    }
+                                }
+                                <p>@count.ToString()</p>
+                            </div>
+                        </div>
+                    }
+                    @if (object2 < users.Count)
+                    {
+                        <div class="media pb-5 col-6">
+                            <img class="mr-3 img-thumbnail" src="https://image.shutterstock.com/image-vector/silhouette-people-unknown-male-person-260nw-1372192277.jpg" alt="Generic placeholder image" style="width:200px;height:250px;">
+                            <div class="media-body">
+                                <label>Customer Name:</label>
+                                <p class="mt-0"> @users[object2].User_FirstName @users[object2].User_LastName</p>
+                                <label>Phone Number:</label>
+                                <p>@users[object2].User_PhoneNumber</p>
+                                <label>Email:</label>
+                                <p>@users[object2].User_EmailAddress</p>
+                                <label>Gender:</label>
+                                <p>@users[object2].User_Gender</p>
+                                <label>Birthday:</label>
+                                <p>@users[object2].User_Birthday.ToString()</p>
+                                <label>Total Reservations:</label>
+                                @{
+                                    int count = 0;
+                                    for (int index = 0; index < reservations.Count; index++)
+                                    {
+                                        if (reservations[index].User_ID == users[object2].User_ID)
+                                        {
+                                            ++count;
+                                        }
+                                    }
+                                }
+                                <p>@count.ToString()</p>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        }
+        else
+        {
+            for (int i = 0; i < (model.MaxObject % model.ObjectEachPage + 1) / 2; i++)
+            {
+                int object1 = PageId * model.ObjectEachPage + 1 + i * 2;
+                int object2 = object1 + 1;
+                <div class="row">
+                    @if (object1 < users.Count)
+                    {
+                        <div class="media pb-5 col-6">
+                            <img class="mr-3 img-thumbnail" src="https://image.shutterstock.com/image-vector/silhouette-people-unknown-male-person-260nw-1372192277.jpg" alt="Generic placeholder image" style="width:200px;height:250px;">
+                            <div class="media-body">
+                                <label>Customer Name:</label>
+                                <p class="mt-0"> @users[object1].User_FirstName @users[object1].User_LastName</p>
+                                <label>Phone Number:</label>
+                                <p>@users[object1].User_PhoneNumber</p>
+                                <label>Email:</label>
+                                <p>@users[object1].User_EmailAddress</p>
+                                <label>Gender:</label>
+                                <p>@users[object1].User_Gender</p>
+                                <label>Birthday:</label>
+                                <p>@users[object1].User_Birthday.ToString()</p>
+                                <label>Total Reservations:</label>
+                                @{
+                                    int count = 0;
+                                    for (int index = 0; index < reservations.Count; index++)
+                                    {
+                                        if (reservations[index].User_ID == users[object1].User_ID)
+                                        {
+                                            ++count;
+                                        }
+                                    }
+                                }
+                                <p>@count.ToString()</p>
+                            </div>
+                        </div>
+                    }
+                    @if (object2 < users.Count)
+                    {
+                        <div class="media pb-5 col-6">
+                            <img class="mr-3 img-thumbnail" src="https://image.shutterstock.com/image-vector/silhouette-people-unknown-male-person-260nw-1372192277.jpg" alt="Generic placeholder image" style="width:200px;height:250px;">
+                            <div class="media-body">
+                                <label>Customer Name:</label>
+                                <p class="mt-0"> @users[object2].User_FirstName @users[object2].User_LastName</p>
+                                <label>Phone Number:</label>
+                                <p>@users[object2].User_PhoneNumber</p>
+                                <label>Email:</label>
+                                <p>@users[object2].User_EmailAddress</p>
+                                <label>Gender:</label>
+                                <p>@users[object2].User_Gender</p>
+                                <label>Birthday:</label>
+                                <p>@users[object2].User_Birthday.ToString()</p>
+                                <label>Total Reservations:</label>
+                                @{
+                                    int count = 0;
+                                    for (int index = 0; index < reservations.Count; index++)
+                                    {
+                                        if (reservations[index].User_ID == users[object2].User_ID)
+                                        {
+                                            ++count;
+                                        }
+                                    }
+                                }
+                                <p>@count.ToString()</p>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        }
+    </div>
+    <BSPagination Alignment="Alignment.Center">
+        <BSPaginationItem IsDisabled="IsFirstPage()">
+
+            <BSPaginationLink Href="@URLPage(PageId-1)" PaginationLinkType="PaginationLinkType.PreviousText"></BSPaginationLink>
+
+        </BSPaginationItem>
+        @if (model.MaxPages < 10)
+            for (int i = 0; i < model.MaxPages; i++)
+            {
+                if (PageId == i)
+                {
+                    int numPage = i;
+                    <BSPaginationItem IsActive="true">
+
+                        <BSPaginationLink Href="@URLPage(numPage)">@numPage</BSPaginationLink>
+
+                    </BSPaginationItem>
+                }
+                else
+                {
+                    int numPage = i;
+                    <BSPaginationItem IsActive="false">
+
+                        <BSPaginationLink Href="@URLPage(numPage)">@numPage</BSPaginationLink>
+
+                    </BSPaginationItem>
+                }
+            }
+        else
+        {
+            if (PageId < 10)
+            {
+                for (int i = 0; i < 10; i++)
+                {
+                    if (PageId == i)
+                    {
+                        int numPage = i;
+                        <BSPaginationItem IsActive="true">
+
+                            <BSPaginationLink Href="@URLPage(numPage)">@numPage</BSPaginationLink>
+
+                        </BSPaginationItem>
+                    }
+                    else
+                    {
+                        int numPage = i;
+                        <BSPaginationItem IsActive="false">
+
+                            <BSPaginationLink Href="@URLPage(numPage)">@numPage</BSPaginationLink>
+
+                        </BSPaginationItem>
+                    }
+                }
+                <BSPaginationItem IsDisabled="true">
+
+                    <BSPaginationLink Href="">...</BSPaginationLink>
+
+                </BSPaginationItem>
+            }
+            else
+            {
+                if (PageId != model.MaxPages - 1)
+                {
+                    <BSPaginationItem IsDisabled="true">
+
+                        <BSPaginationLink Href="">...</BSPaginationLink>
+
+                    </BSPaginationItem>
+                    for (int i = PageId - 9; i < PageId + 1; i++)
+                    {
+                        if (PageId == i)
+                        {
+                            int numPage = i;
+                            <BSPaginationItem IsActive="true">
+
+                                <BSPaginationLink Href="@URLPage(numPage)">@numPage</BSPaginationLink>
+
+                            </BSPaginationItem>
+                        }
+                        else
+                        {
+                            int numPage = i;
+                            <BSPaginationItem IsActive="false">
+
+                                <BSPaginationLink Href="@URLPage(numPage)">@numPage</BSPaginationLink>
+
+                            </BSPaginationItem>
+                        }
+                    }
+                    <BSPaginationItem IsDisabled="true">
+
+                        <BSPaginationLink Href="">...</BSPaginationLink>
+
+                    </BSPaginationItem>
+                }
+                else
+                {
+                    <BSPaginationItem IsDisabled="true">
+
+                        <BSPaginationLink Href="">...</BSPaginationLink>
+
+                    </BSPaginationItem>
+                    for (int i = PageId - 9; i < PageId + 1; i++)
+                    {
+                        if (PageId == i)
+                        {
+                            int numPage = i;
+                            <BSPaginationItem IsActive="true">
+
+                                <BSPaginationLink Href="@URLPage(numPage)">@numPage</BSPaginationLink>
+
+                            </BSPaginationItem>
+                        }
+                        else
+                        {
+                            int numPage = i;
+                            <BSPaginationItem IsActive="false">
+
+                                <BSPaginationLink Href="@URLPage(numPage)">@numPage</BSPaginationLink>
+
+                            </BSPaginationItem>
+                        }
+                    }
+                }
+            }
+        }
+
+        <BSPaginationItem IsDisabled="IsFinalPage()">
+
+            <BSPaginationLink Href="@URLPage(PageId+1)" PaginationLinkType="PaginationLinkType.NextText"></BSPaginationLink>
+
+        </BSPaginationItem>
+
+    </BSPagination>
+</div>
+@code {
+
+    [Parameter]
+    public int PageId { get; set; }
+
+    Pagination model = new Pagination(1, 1);
+    List<ReservationModel> reservations = new List<ReservationModel>();
+    List<UserModel> users = new List<UserModel>();
+
+    string URLPage(int numPage)
+    {
+        string temp = "/staff/customermanagement/" + numPage.ToString();
+        return temp;
+    }
+
+    bool IsFirstPage()
+    {
+        if (PageId == 0) return true;
+        else return false;
+    }
+
+    bool IsFinalPage()
+    {
+        if (PageId == model.MaxPages - 1) return true;
+        else return false;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        reservations = await ReservationDB.GetReservations();
+        users = await UserDB.GetUsers();
+
+        List<ReservationModel> temptReservations = new List<ReservationModel>();
+        List<UserModel> temptUsers = new List<UserModel>();
+        temptUsers.Add(users[0]);
+
+        for (int index = 0; index < reservations.Count; index++)
+        {
+            if (reservations[index].Hotel_ID == CurrentInfo.Hotel_ID)
+            {
+                if (temptReservations.Count == 0)
+                {
+                    temptReservations.Add(reservations[index]);
+                }
+                temptReservations.Add(reservations[index]);
+            }
+        }
+        reservations.Clear();
+        reservations = temptReservations;
+        model = new Pagination(temptReservations.Count, 8);
+
+        for (int userIndex = 0; userIndex < users.Count; userIndex++)
+        {
+            for (int reservationIndex = 0; reservationIndex < reservations.Count; reservationIndex++)
+            {
+                if (users[userIndex].User_ID == reservations[reservationIndex].User_ID)
+                {
+                    temptUsers.Add(users[userIndex]);
+                    break;
+                }
+            }
+        }
+        users.Clear();
+        users = temptUsers;
+    }
+}

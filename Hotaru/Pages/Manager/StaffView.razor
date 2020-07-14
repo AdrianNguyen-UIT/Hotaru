@@ -1,0 +1,76 @@
+﻿@page "/manager/staffview"
+@layout Hotaru.Shared.LayOut.ManagerLayout
+
+@using DataAccessLibrary;
+@using DataAccessLibrary.Models;
+@using Hotaru.DisplayModels;
+
+@inject IStaffData StaffDB;
+@inject ILoginData LoginDB;
+@inject IHotelEmployeeData HotelEmployeeDB;
+@inject IHotelData HotelDB;
+<div class="main">
+    <div class="row">
+        <div class="col-4">
+            <BSCard CardType="CardType.Card">
+                <BSCard CardType="CardType.Image" VerticalAlignment="VerticalAlignment.Top" src="https://image.shutterstock.com/image-vector/silhouette-people-unknown-male-person-260nw-1372192277.jpg" alt="Card image cap" />
+                <BSCard CardType="CardType.Body">
+                    <BSCard CardType="CardType.Title">@staff.User_FirstName</BSCard>
+                    <BSCard CardType="CardType.Title">@staff.User_LastName</BSCard>
+                    <BSCard CardType="CardType.Subtitle">@hotel.Hotel_Name, Staff</BSCard>
+                    <BSCard CardType="CardType.Subtitle">@staff.User_EmailAddress</BSCard>
+                    <BSCard CardType="CardType.Subtitle">@staff.User_PhoneNumber</BSCard>
+                    <BSCard CardType="CardType.Subtitle">@staff.User_Gender</BSCard>
+                    <BSCard CardType="CardType.Subtitle">@staff.User_Birthday</BSCard>
+                    <br />
+                </BSCard>
+            </BSCard>
+        </div>
+        <div class="col-8 pd-20">
+            <h3>
+                <span class="mr-2 oi oi-person"></span>
+                About
+            </h3>
+            <div class="row">
+                <div class="row">
+                    <div class="col-5 pb-3">First Name:</div><div class="col-7 pb-3">@staff.User_FirstName</div>
+                    <div class="col-5 pb-3">Last Name:</div><div class="col-7 pb-3">@staff.User_LastName</div>
+                    <div class="col-5 pb-3">Email:</div><div class="col-7 pb-3">@staff.User_EmailAddress</div>
+                    <div class="col-5 pb-3">Phone Number:</div><div class="col-7 pb-3">@staff.User_PhoneNumber</div>
+                    <div class="col-5 pb-3">Gender</div><div class="col-7 pb-3">@staff.User_Gender</div>
+                    <div class="col-5 pb-3">Birthday</div><div class="col-7 pb-3">@staff.User_Birthday</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@code
+{
+
+    StaffModel staff = new StaffModel();
+    HotelModel hotel = new HotelModel();
+    protected override async Task OnInitializedAsync()
+    {
+        List<StaffModel> staffs = await StaffDB.GetStaffs();
+        for (int index = 0; index < staffs.Count; index++)
+        {
+            if (staffs[index].User_ID == CurrentInfo.Staff_ID)
+            {
+                staff = staffs[index];
+                break;
+            }
+        }
+
+        List<HotelModel> hotels = await HotelDB.GetHotels();
+        for (int index = 0; index < hotels.Count; index++)
+        {
+            if (hotels[index].Hotel_ID == CurrentInfo.Hotel_ID)
+            {
+                hotel = hotels[index];
+                break;
+            }
+        }
+    }
+
+
+}

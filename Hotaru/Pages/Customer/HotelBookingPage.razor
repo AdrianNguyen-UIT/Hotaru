@@ -1,0 +1,207 @@
+﻿@page "/booking/hotel/"
+@layout Hotaru.Shared.LayOut.UserLayout
+
+@using DataAccessLibrary;
+@using DataAccessLibrary.Models;
+@using Hotaru.DisplayModels;
+
+@inject IRoomData RoomDB;
+@inject IHotelData HotelDB;
+@inject IRoomTypeData RoomTypeDB;
+@inject IRoomStateData RoomStateDB;
+@inject IImageData ImageDB;
+@inject IReservationData ReservationDB;
+@inject IPaymentData PaymentDB; 
+
+<div class="main">
+    @if (!string.IsNullOrWhiteSpace(alert))
+    {
+        <BSAlert Color="Color.Success">
+
+            @alert<span class="oi oi-circle-x ml-2" @onclick="CloseAlert"></span>
+
+        </BSAlert>
+    }
+
+    <BSJumbotron>
+
+        <BSCard CardType="CardType.Card">
+
+            <BSCard CardType="CardType.Image" VerticalAlignment="VerticalAlignment.Top" src="@image.HotelImage_Source" alt="Card image cap" />
+
+            <BSCard CardType="CardType.Body">
+
+                <BSCard CardType="CardType.Title">@hotel.Hotel_Name</BSCard>
+
+                <BSCard CardType="CardType.Subtitle">@hotel.Hotel_Location</BSCard>
+
+                <BSCard CardType="CardType.Subtitle">@hotel.Hotel_PhoneNumber</BSCard>
+
+                <BSCard CardType="CardType.Subtitle">@hotel.Hotel_EmailAddress</BSCard>
+
+                <BSCard CardType="CardType.Text">@hotel.Hotel_Description</BSCard>
+            </BSCard>
+        </BSCard>
+
+        <hr class="my-4" />
+        <BSBasicForm>
+            <BSFormGroup>
+                <BSLabel>Room select</BSLabel>
+                <div class="row">
+                    @{ if (!string.IsNullOrEmpty(selectedIndex))
+                        {
+                            <BSBasicInput Class="col-12" InputType="InputType.Select" @bind-Value="selectedIndex">
+
+                                @for (int index = 0; index < hotelRooms.Count; index++)
+                                    {
+                                        if (hotelRoomStates[index].RoomState_Marked == true)
+                                        {
+                                            string value = hotelRooms[index].Room_Number;
+                                            if (index.ToString() == selectedIndex)
+                                            {
+                                            <option value="@index.ToString()" selected>@value</option>
+                                            }
+                                            else
+                                            {
+                                            <option value="@index.ToString()">@value</option>
+                                            }
+                                        }
+                                    }
+                            </BSBasicInput>
+
+                            string price = hotelRoomTypes[int.Parse(selectedIndex)].RoomType_Price.ToString() + " vnđ";
+                            string roomTypeName = hotelRoomTypes[int.Parse(selectedIndex)].RoomType_Name;
+
+                            <BSBasicInput Class="col-8" InputType="InputType.Text" IsDisabled="true" Value="roomTypeName"></BSBasicInput>
+                            <BSBasicInput Class="col-4" InputType="InputType.Text" IsDisabled="true" Value="price"></BSBasicInput>
+                        }
+                    }
+                </div>
+            </BSFormGroup>
+            <BSFormGroup>
+                <BSLabel>Start Date</BSLabel>
+                <div class="row">
+                    <BSBasicInput Class="col-12" InputType="InputType.Date" @bind-Value="reservation.Reservation_StartDate"></BSBasicInput>
+                </div>
+            </BSFormGroup>
+            <BSFormGroup>
+                <BSLabel>End Date</BSLabel>
+                <div class="row">
+                    <BSBasicInput Class="col-12" InputType="InputType.Date" @bind-Value="reservation.Reservation_EndDate"></BSBasicInput>
+                </div>
+            </BSFormGroup>
+            <BSFormGroup>
+                <BSLabel>Description</BSLabel>
+                <div class="row">
+                    <BSBasicInput Class="col-12" InputType="InputType.TextArea" @bind-Value="reservation.Reservation_Description"></BSBasicInput>
+                </div>
+            </BSFormGroup>
+            <BSButton Class="p-3" Color=Color.Primary Size=Size.Large OnClick="Booking">Booking</BSButton>
+        </BSBasicForm>
+
+    </BSJumbotron>
+</div>
+
+@code {
+    List<RoomModel> hotelRooms = new List<RoomModel>();
+    List<RoomTypeModel> hotelRoomTypes = new List<RoomTypeModel>();
+    List<RoomStateModel> hotelRoomStates = new List<RoomStateModel>();
+
+    HotelModel hotel = new HotelModel();
+    ImageModel image = new ImageModel();
+    ReservationModel reservation = new ReservationModel();
+
+    string selectedIndex = string.Empty;
+    string alert = string.Empty;
+
+    private async Task Booking()
+    {
+        reservation.Room_ID = hotelRooms[int.Parse(selectedIndex)].Room_ID;
+        await ReservationDB.InsertReservation(reservation);
+        List<ReservationModel> reservations = await ReservationDB.GetReservations();
+
+        for (int index = 0; index < reservations.Count; index++)
+        {
+            if (reservations[index].Reservation_StartDate == reservation.Reservation_StartDate
+                && reservations[index].Reservation_EndDate == reservation.Reservation_EndDate
+                && reservations[index].Room_ID == reservation.Room_ID
+                && reservations[index].User_ID == reservation.User_ID
+                && reservations[index].Reservation_Description == reservation.Reservation_Description)
+            {
+                reservation = reservations[index];
+                break;
+            }
+        }
+        PaymentModel payment = new PaymentModel
+        {
+            Payment_Date = DateTime.Now,
+            Reservation_ID = reservation.Reservation_ID,
+            Payment_Pay = false
+        };
+        await PaymentDB.InsertPayment(payment);
+
+        alert = "Booking successfully!";
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        reservation.Reservation_ReserveDate = DateTime.Now;
+        reservation.User_ID = CurrentInfo.User_ID;
+        reservation.Reservation_Description = string.Empty;
+
+        List<HotelModel> hotels = await HotelDB.GetHotels();
+        List<RoomModel> rooms = await RoomDB.GetRooms();
+        List<RoomTypeModel> roomTypes = await RoomTypeDB.GetRoomTypes();
+        List<RoomStateModel> roomStates = await RoomStateDB.GetRoomStates();
+        List<ImageModel> images = await ImageDB.GetImages();
+
+        for (int index = 0; index < hotels.Count; index++)
+        {
+            if (hotels[index].Hotel_ID == CurrentInfo.Hotel_ID)
+            {
+                hotel = hotels[index];
+                break;
+            }
+        }
+
+        for (int roomIndex = 0; roomIndex < rooms.Count; roomIndex++)
+        {
+            if (rooms[roomIndex].Hotel_ID == hotel.Hotel_ID)
+            {
+                hotelRooms.Add(rooms[roomIndex]);
+
+                for (int roomTypeIndex = 0; roomTypeIndex < roomTypes.Count; roomTypeIndex++)
+                {
+                    if (roomTypes[roomTypeIndex].RoomType_ID == rooms[roomIndex].RoomType_ID)
+                    {
+                        hotelRoomTypes.Add(roomTypes[roomTypeIndex]);
+                        break;
+                    }
+                }
+
+                for (int roomStateIndex = 0; roomStateIndex < roomStates.Count; roomStateIndex++)
+                {
+                    if (roomStates[roomStateIndex].RoomState_ID == rooms[roomIndex].RoomState_ID)
+                    {
+                        hotelRoomStates.Add(roomStates[roomStateIndex]);
+                        break;
+                    }
+                }
+            }
+        }
+        selectedIndex = "0";
+        for (int imageIndex = 0; imageIndex < images.Count; imageIndex++)
+        {
+            if (images[imageIndex].Hotel_ID == hotel.Hotel_ID)
+            {
+                image = images[imageIndex];
+                break;
+            }
+        }
+    }
+
+    public void CloseAlert()
+    {
+        alert = String.Empty;
+    }
+}

@@ -1,0 +1,36 @@
+﻿@page "/manager/datareport"
+@layout Hotaru.Shared.LayOut.ManagerLayout
+@inject NavigationManager nvg
+
+<div class="main">
+    <h3 class="text-center px-3"><label>Choose date and report form:</label></h3>
+    <BSBasicInput Class="px-3" InputType="InputType.Date" Value="DateTime.Now"></BSBasicInput>
+    <div class="form-check offset-3 px-3">
+        <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios1" value="option1" checked>
+        <label class="form-check-label" for="exampleRadios1">
+            Day
+        </label>
+    </div>
+    <div class="form-check offset-3 px-3">
+        <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios2" value="option2">
+        <label class="form-check-label" for="exampleRadios2">
+            Month
+        </label>
+    </div>
+    <div class="form-check offset-3 px-3">
+        <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios3" value="option3">
+        <label class="form-check-label" for="exampleRadios3">
+            Year
+        </label>
+    </div>
+    <BSButton Color="Color.Primary" Size="Size.Large" OnClick="nvgToView">View</BSButton>
+    <BSButton Color="Color.Info" Size="Size.Large">Print</BSButton>
+</div>
+
+@code {
+    void nvgToView()
+    {
+        nvg.NavigateTo("/manager/transactionstatictis");
+    }
+}
+

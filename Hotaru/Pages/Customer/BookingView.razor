@@ -1,0 +1,216 @@
+﻿@page "/booking/view/"
+@layout Hotaru.Shared.LayOut.UserLayout
+@inject IReservationData ReservationDB;
+@inject IPaymentData PaymentDB;
+@inject IRoomData RoomDB;
+@inject IHotelData HotelDB;
+@inject IRoomTypeData RoomTypeDB;
+@inject IRoomStateData RoomStateDB;
+@inject IImageData ImageDB;
+
+@using DataAccessLibrary;
+@using DataAccessLibrary.Models;
+@using Hotaru.DisplayModels;
+
+<div class="main">
+    <BSJumbotron>
+
+        <BSCard CardType="CardType.Card">
+
+            <BSCard CardType="CardType.Image" VerticalAlignment="VerticalAlignment.Top" src="@image.HotelImage_Source" alt="Card image cap" />
+
+            <BSCard CardType="CardType.Body">
+
+                <BSCard CardType="CardType.Title">@hotel.Hotel_Name</BSCard>
+
+                <BSCard CardType="CardType.Subtitle">@hotel.Hotel_Location</BSCard>
+
+                <BSCard CardType="CardType.Subtitle">@hotel.Hotel_PhoneNumber</BSCard>
+
+                <BSCard CardType="CardType.Subtitle">@hotel.Hotel_EmailAddress</BSCard>
+
+                <BSCard CardType="CardType.Text">@hotel.Hotel_Description</BSCard>
+            </BSCard>
+        </BSCard>
+        <hr class="my-4" />
+        <BSBasicForm>
+            <BSFormGroup>
+                <BSLabel>Room select</BSLabel>
+                <div class="row">
+                    @{ if (!string.IsNullOrEmpty(selectedIndex))
+                        {
+                            <BSBasicInput Class="col-12" InputType="InputType.Select" @bind-Value="selectedIndex">
+
+                                @for (int index = 0; index < hotelRooms.Count; index++)
+                                    {
+                                        if (hotelRoomStates[index].RoomState_Marked == true)
+                                        {
+                                            string value = hotelRooms[index].Room_Number;
+                                            if (index.ToString() == selectedIndex)
+                                            {
+                                            <option value="@index.ToString()" selected>@value</option>
+                                            }
+                                            else
+                                            {
+                                            <option value="@index.ToString()">@value</option>
+                                            }
+                                        }
+                                    }
+                            </BSBasicInput>
+
+                            string price = hotelRoomTypes[int.Parse(selectedIndex)].RoomType_Price.ToString() + " vnđ";
+                            string roomTypeName = hotelRoomTypes[int.Parse(selectedIndex)].RoomType_Name;
+
+                            <BSBasicInput Class="col-8" InputType="InputType.Text" IsDisabled="true" Value="roomTypeName"></BSBasicInput>
+                            <BSBasicInput Class="col-4" InputType="InputType.Text" IsDisabled="true" Value="price"></BSBasicInput>
+                        }
+                    }
+                </div>
+            </BSFormGroup>
+            <BSFormGroup>
+                <BSLabel>Reserve Date</BSLabel>
+                <div class="row">
+                    <BSBasicInput Class="col-12" InputType="InputType.Date" IsDisabled="true" Value="reservation.Reservation_ReserveDate"></BSBasicInput>
+                </div>
+            </BSFormGroup>
+            <BSFormGroup>
+                <BSLabel>Start Date</BSLabel>
+                <div class="row">
+                    <BSBasicInput Class="col-12" InputType="InputType.Date" @bind-Value="reservation.Reservation_StartDate"></BSBasicInput>
+                </div>
+            </BSFormGroup>
+            <BSFormGroup>
+                <BSLabel>End Date</BSLabel>
+                <div class="row">
+                    <BSBasicInput Class="col-12" InputType="InputType.Date" @bind-Value="reservation.Reservation_EndDate"></BSBasicInput>
+                </div>
+            </BSFormGroup>
+            <BSFormGroup>
+                <BSLabel>Payment Date</BSLabel>
+                <div class="row">
+                    @{
+                        if (payment.Payment_Pay)
+                        {
+                            <BSBasicInput Class="col-12" InputType="InputType.Date" IsDisabled="true" Value="payment.Payment_Date"></BSBasicInput>
+                        }
+                    }
+                </div>
+            </BSFormGroup>
+            <BSFormGroup>
+                <BSLabel>Total Payment</BSLabel>
+                <div class="row">
+                    @{
+                        string total = payment.Payment_Total.ToString() + " vnđ";
+                    }
+                    <BSBasicInput Class="col-12" InputType="InputType.Text" IsDisabled="true" Value="total"></BSBasicInput>
+                </div>
+            </BSFormGroup>
+            <BSFormGroup>
+                <BSLabel>Description</BSLabel>
+                 <BSBasicInput Class="col-12" InputType="InputType.TextArea" IsDisabled="true" Value="reservation.Reservation_Description"></BSBasicInput>
+            </BSFormGroup>
+            <BSButton Class="p-3" Color=Color.Primary Size=Size.Large OnClick="Edit">Edit</BSButton>
+        </BSBasicForm>
+
+    </BSJumbotron>
+</div>
+
+@code {
+    List<RoomModel> hotelRooms = new List<RoomModel>();
+    List<RoomTypeModel> hotelRoomTypes = new List<RoomTypeModel>();
+    List<RoomStateModel> hotelRoomStates = new List<RoomStateModel>();
+
+    HotelModel hotel = new HotelModel();
+    ImageModel image = new ImageModel();
+    ReservationModel reservation = new ReservationModel();
+    PaymentModel payment = new PaymentModel();
+
+    string selectedIndex = string.Empty;
+
+    private async Task Edit()
+    {
+        await ReservationDB.UpdateReservation(reservation);
+
+        await OnInitializedAsync();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        List<ReservationModel> reservations = await ReservationDB.GetReservations();
+        List<HotelModel> hotels = await HotelDB.GetHotels();
+        List<ImageModel> images = await ImageDB.GetImages();
+        List<PaymentModel> payments = await PaymentDB.GetPayments();
+        List<RoomModel> rooms = await RoomDB.GetRooms();
+        List<RoomTypeModel> roomTypes = await RoomTypeDB.GetRoomTypes();
+        List<RoomStateModel> roomStates = await RoomStateDB.GetRoomStates();
+
+        for (int reservationIndex = 0; reservationIndex < reservations.Count; reservationIndex++)
+        {
+            if (reservations[reservationIndex].Reservation_ID == CurrentInfo.Reservation_ID)
+            {
+                reservation = reservations[reservationIndex];
+                break;
+            }
+        }
+
+        for (int hotelIndex = 0; hotelIndex < hotels.Count; hotelIndex++)
+        {
+            if (hotels[hotelIndex].Hotel_ID == reservation.Hotel_ID)
+            {
+                hotel = hotels[hotelIndex];
+                break;
+            }
+        }
+        for (int roomIndex = 0; roomIndex < rooms.Count; roomIndex++)
+        {
+            if (rooms[roomIndex].Room_ID == reservation.Room_ID)
+            {
+                selectedIndex = roomIndex.ToString();
+            }
+        }
+
+        for (int roomIndex = 0; roomIndex < rooms.Count; roomIndex++)
+        {
+            if (rooms[roomIndex].Hotel_ID == hotel.Hotel_ID)
+            {
+                hotelRooms.Add(rooms[roomIndex]);
+
+                for (int roomTypeIndex = 0; roomTypeIndex < roomTypes.Count; roomTypeIndex++)
+                {
+                    if (roomTypes[roomTypeIndex].RoomType_ID == rooms[roomIndex].RoomType_ID)
+                    {
+                        hotelRoomTypes.Add(roomTypes[roomTypeIndex]);
+                        break;
+                    }
+                }
+
+                for (int roomStateIndex = 0; roomStateIndex < roomStates.Count; roomStateIndex++)
+                {
+                    if (roomStates[roomStateIndex].RoomState_ID == rooms[roomIndex].RoomState_ID)
+                    {
+                        hotelRoomStates.Add(roomStates[roomStateIndex]);
+                        break;
+                    }
+                }
+            }
+        }
+
+        for (int paymentIndex = 0; paymentIndex < payments.Count; paymentIndex++)
+        {
+            if (payments[paymentIndex].Reservation_ID == reservation.Reservation_ID)
+            {
+                payment = payments[paymentIndex];
+                break;
+            }
+        }
+
+        for (int imageIndex = 0; imageIndex < images.Count; imageIndex++)
+        {
+            if (images[imageIndex].Hotel_ID == hotel.Hotel_ID)
+            {
+                image = images[imageIndex];
+                break;
+            }
+        }
+    }
+}

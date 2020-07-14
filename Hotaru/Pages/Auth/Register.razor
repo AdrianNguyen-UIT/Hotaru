@@ -1,0 +1,178 @@
+﻿@page "/register"
+@inject NavigationManager nvg
+@layout Hotaru.Shared.LayOut.AuthLayout
+
+@using DataAccessLibrary;
+@using DataAccessLibrary.Models;
+@using Hotaru.DisplayModels;
+@inject IUserData UserDB;
+@inject ILoginData LoginDB;  
+<div class="col-12 p-5">
+
+    @if (!string.IsNullOrWhiteSpace(alert))
+    {
+        <BSAlert Color="Color.Success">
+
+            @alert<span class="oi oi-circle-x ml-2" @onclick="CloseAlert"></span>
+
+        </BSAlert>
+    }
+
+<BSForm Model="@newRegister" ValidateOnInit="false">
+
+    <DataAnnotationsValidator />
+
+    <BSFormGroup>
+
+        <BSLabel For="FirstNameInput">First Name</BSLabel>
+
+        <BSInput Id="FirstNameInput" InputType="InputType.Text" PlaceHolder="Enter First Name" @bind-Value="@newRegister.User_FirstName">First Name</BSInput>
+
+        <BSFormFeedback For="@(() => newRegister.User_FirstName)"></BSFormFeedback>
+
+    </BSFormGroup>
+
+    <BSFormGroup>
+
+        <BSLabel For="LastNameInput">Last Name</BSLabel>
+
+        <BSInput Id="LastNameInput" InputType="InputType.Text" PlaceHolder="Enter Last Name" @bind-Value="@newRegister.User_LastName">Last Name</BSInput>
+
+        <BSFormFeedback For="@(() => newRegister.User_LastName)"></BSFormFeedback>
+
+    </BSFormGroup>
+
+    <BSFormGroup>
+
+        <BSLabel For="EmailInput">Email</BSLabel>
+
+        <BSInput Id="EmailInput" InputType="InputType.Email" PlaceHolder="Enter Email Address" @bind-Value="@newRegister.User_EmailAddress">Email Address</BSInput>
+
+        <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
+
+        <BSFormFeedback For="@(() => newRegister.User_EmailAddress)"></BSFormFeedback>
+
+    </BSFormGroup>
+
+    <BSFormGroup>
+
+        <BSLabel For="PhoneInput">Phone Number</BSLabel>
+
+        <BSInput InputType="InputType.Tel" PlaceHolder="Phone Number" Id="PhoneInput" @bind-Value="@newRegister.User_PhoneNumber"></BSInput>
+
+        <BSFormFeedback For="@(() => newRegister.User_PhoneNumber)"></BSFormFeedback>
+
+    </BSFormGroup>
+
+    <BSFormGroup>
+        <BSLabel For="GenderInput">Gender</BSLabel>
+
+        <BSInput InputType="InputType.Select" Id="GenderInput" @bind-Value="@newRegister.User_Gender">
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Other">Other</option>
+        </BSInput>
+    </BSFormGroup>
+
+    <BSFormGroup>
+        <BSLabel For="BirthdayInput">Birthday</BSLabel>
+
+        <BSInput InputType="InputType.Date" Id="BirthdayInput" @bind-Value="@newRegister.User_Birthday"> </BSInput>
+
+        <BSFormFeedback For="@(() => newRegister.User_Birthday)"></BSFormFeedback>
+
+    </BSFormGroup>
+
+    <BSFormGroup>
+
+        <BSLabel For="UserNameInput">Username</BSLabel>
+
+        <BSInput Id="UserNameInput" InputType="InputType.Text" PlaceHolder="Enter Username" @bind-Value="@newRegister.User_UserName">Username</BSInput>
+
+        <BSFormFeedback For="@(() => newRegister.User_UserName)"></BSFormFeedback>
+
+    </BSFormGroup>
+
+    <BSFormGroup>
+
+        <BSLabel For="PasswordInput">Password</BSLabel>
+
+        <BSInput InputType="InputType.Password" PlaceHolder="Password" Id="PasswordInput" @bind-Value="@newRegister.User_Password"></BSInput>
+
+        <BSFormFeedback For="@(() => newRegister.User_Password)"></BSFormFeedback>
+
+    </BSFormGroup>
+
+    <BSFormGroup>
+
+        <BSLabel For="ConfirmPasswordInput">Confirm Password</BSLabel>
+
+        <BSInput InputType="InputType.Password" PlaceHolder="ConfirmPassword" Id="ConfirmPasswordInput" @bind-Value="@newRegister.User_ConfirmPassword"></BSInput>
+
+        <BSFormFeedback For="@(() => newRegister.User_ConfirmPassword)"></BSFormFeedback>
+
+    </BSFormGroup>
+
+    <BSButton Color="Color.Primary" IsBlock="true" @onclick="RegisterToHotaru">Register</BSButton>
+
+    <hr style="background-color: #99ffcc" />
+
+    <BSLabel>Already have an account?</BSLabel>
+    <BSButton Color="Color.Secondary" IsBlock="true" @onclick="nvgToLogin">Login</BSButton>
+
+</BSForm>
+
+</div>
+
+@code {
+    DisplayRegisterModel newRegister = new DisplayRegisterModel();
+    string alert = string.Empty;
+    List<UserModel> users = new List<UserModel>();
+
+    public async Task RegisterToHotaru()
+    {
+        UserModel newUser = new UserModel
+        {
+            User_FirstName = newRegister.User_FirstName,
+            User_LastName = newRegister.User_LastName,
+            User_EmailAddress = newRegister.User_EmailAddress,
+            User_PhoneNumber = newRegister.User_PhoneNumber,
+            User_Gender = newRegister.User_Gender,
+            User_Birthday = newRegister.User_Birthday
+        };
+        await UserDB.InsertUser(newUser);
+
+        users = await UserDB.GetUsers();
+
+        for (int index = 0; index < users.Count; index++)
+        {
+            if (users[index].User_FirstName == newUser.User_FirstName
+                && users[index].User_LastName == newUser.User_LastName
+                && users[index].User_EmailAddress == newUser.User_EmailAddress
+                && users[index].User_PhoneNumber == newUser.User_PhoneNumber
+                && users[index].User_Gender == newUser.User_Gender
+                && users[index].User_Birthday == newUser.User_Birthday)
+            {
+                LoginModel newLogin = new LoginModel
+                {
+                    Login_UserName = newRegister.User_UserName,
+                    Login_Password = newRegister.User_Password,
+                    User_ID = users[index].User_ID
+                };
+                await LoginDB.InsertLogin(newLogin);
+            }
+        }
+        alert = "Account has been create successfully";
+    }
+
+    public void CloseAlert()
+    {
+        alert = string.Empty;
+    }
+
+    public void nvgToLogin()
+    {
+        nvg.NavigateTo("/login");
+    }
+
+}

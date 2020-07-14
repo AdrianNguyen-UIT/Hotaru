@@ -1,0 +1,194 @@
+﻿@page "/manager/offlinebooking/"
+@layout Hotaru.Shared.LayOut.ManagerLayout
+
+@using DataAccessLibrary;
+@using DataAccessLibrary.Models;
+@using Hotaru.DisplayModels;
+
+@inject IRoomData RoomDB;
+@inject IRoomTypeData RoomTypeDB;
+@inject IRoomStateData RoomStateDB;
+@inject IReservationData ReservationDB;
+@inject IPaymentData PaymentDB;
+
+<div class="main">
+    @if (!string.IsNullOrWhiteSpace(alert))
+    {
+        <BSAlert Color="Color.Success">
+
+            @alert<span class="oi oi-circle-x ml-2" @onclick="CloseAlert"></span>
+
+        </BSAlert>
+    }
+    <BSJumbotron>
+        <BSBasicForm>
+            <BSFormGroup>
+                <BSLabel>Room select</BSLabel>
+                <div class="row">
+                    @{ if (!string.IsNullOrEmpty(selectedIndex))
+                        {
+                            <BSBasicInput Class="col-12" InputType="InputType.Select" @bind-Value="selectedIndex">
+
+                                @for (int index = 0; index < hotelRooms.Count; index++)
+                                    {
+                                        if (hotelRoomStates[index].RoomState_Marked == true)
+                                        {
+                                            string value = hotelRooms[index].Room_Number;
+                                            if (index.ToString() == selectedIndex)
+                                            {
+                                            <option value="@index.ToString()" selected>@value</option>
+                                            }
+                                            else
+                                            {
+                                            <option value="@index.ToString()">@value</option>
+                                            }
+                                        }
+                                    }
+                            </BSBasicInput>
+
+                            string price = hotelRoomTypes[int.Parse(selectedIndex)].RoomType_Price.ToString() + " vnđ";
+                            string roomTypeName = hotelRoomTypes[int.Parse(selectedIndex)].RoomType_Name;
+
+                            <BSBasicInput Class="col-8" InputType="InputType.Text" IsDisabled="true" Value="roomTypeName"></BSBasicInput>
+                            <BSBasicInput Class="col-4" InputType="InputType.Text" IsDisabled="true" Value="price"></BSBasicInput>
+                        }
+                    }
+                </div>
+            </BSFormGroup>
+            <BSFormGroup>
+                <BSLabel>Start Date</BSLabel>
+                <div class="row">
+                    <BSBasicInput Class="col-12" InputType="InputType.Date" @bind-Value="reservation.Reservation_StartDate"></BSBasicInput>
+                </div>
+            </BSFormGroup>
+            <BSFormGroup>
+                <BSLabel>End Date</BSLabel>
+                <div class="row">
+                    <BSBasicInput Class="col-12" InputType="InputType.Date" @bind-Value="reservation.Reservation_EndDate"></BSBasicInput>
+                </div>
+            </BSFormGroup>
+            <BSFormGroup>
+                <BSLabel>Name</BSLabel>
+                <div class="row">
+                    <BSBasicInput Class="col-12" InputType="InputType.Text" @bind-Value="customerName"></BSBasicInput>
+                </div>
+            </BSFormGroup>
+            <BSFormGroup>
+                <BSLabel>PhoneNumber</BSLabel>
+                <div class="row">
+                    <BSBasicInput Class="col-12" InputType="InputType.Text" @bind-Value="customerPhoneNumber"></BSBasicInput>
+                </div>
+            </BSFormGroup>
+            <BSFormGroup>
+                <BSLabel>Email</BSLabel>
+                <div class="row">
+                    <BSBasicInput Class="col-12" InputType="InputType.Text" @bind-Value="customerEmailAddress"></BSBasicInput>
+                </div>
+            </BSFormGroup>
+            <BSFormGroup>
+                <BSLabel>Description</BSLabel>
+                <div class="row">
+                    <BSBasicInput Class="col-12" InputType="InputType.TextArea" @bind-Value="customerDescription"></BSBasicInput>
+                </div>
+            </BSFormGroup>
+            <BSButton Class="p-3" Color=Color.Primary Size=Size.Large OnClick="Booking">Confirm</BSButton>
+        </BSBasicForm>
+
+    </BSJumbotron>
+</div>
+
+@code {
+
+    List<RoomModel> hotelRooms = new List<RoomModel>();
+    List<RoomTypeModel> hotelRoomTypes = new List<RoomTypeModel>();
+    List<RoomStateModel> hotelRoomStates = new List<RoomStateModel>();
+    ReservationModel reservation = new ReservationModel();
+
+    string selectedIndex = string.Empty;
+    string alert = string.Empty;
+
+    string customerName = string.Empty;
+    string customerPhoneNumber = string.Empty;
+    string customerEmailAddress = string.Empty;
+    string customerDescription = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        reservation.Reservation_ReserveDate = DateTime.Now;
+        reservation.User_ID = 0;
+        reservation.Reservation_Description = string.Empty;
+
+        List<RoomModel> rooms = await RoomDB.GetRooms();
+        List<RoomTypeModel> roomTypes = await RoomTypeDB.GetRoomTypes();
+        List<RoomStateModel> roomStates = await RoomStateDB.GetRoomStates();
+
+
+
+        for (int roomIndex = 0; roomIndex < rooms.Count; roomIndex++)
+        {
+            if (rooms[roomIndex].Hotel_ID == CurrentInfo.Hotel_ID)
+            {
+                hotelRooms.Add(rooms[roomIndex]);
+
+                for (int roomTypeIndex = 0; roomTypeIndex < roomTypes.Count; roomTypeIndex++)
+                {
+                    if (roomTypes[roomTypeIndex].RoomType_ID == rooms[roomIndex].RoomType_ID)
+                    {
+                        hotelRoomTypes.Add(roomTypes[roomTypeIndex]);
+                        break;
+                    }
+                }
+
+                for (int roomStateIndex = 0; roomStateIndex < roomStates.Count; roomStateIndex++)
+                {
+                    if (roomStates[roomStateIndex].RoomState_ID == rooms[roomIndex].RoomState_ID)
+                    {
+                        hotelRoomStates.Add(roomStates[roomStateIndex]);
+                        break;
+                    }
+                }
+            }
+        }
+        selectedIndex = "0";
+    }
+
+    private async Task Booking()
+    {
+        reservation.Room_ID = hotelRooms[int.Parse(selectedIndex)].Room_ID;
+        reservation.Reservation_Description = 
+            "Name: " + customerName + "\n" +
+            "PhoneNumber: " + customerPhoneNumber + "\n" +
+            "Email: " + customerEmailAddress + "\n" +
+            "Description: " + customerDescription;
+
+        await ReservationDB.InsertReservation(reservation);
+        List<ReservationModel> reservations = await ReservationDB.GetReservations();
+
+        for (int index = 0; index < reservations.Count; index++)
+        {
+            if (reservations[index].Reservation_StartDate == reservation.Reservation_StartDate
+                && reservations[index].Reservation_EndDate == reservation.Reservation_EndDate
+                && reservations[index].Room_ID == reservation.Room_ID
+                && reservations[index].User_ID == reservation.User_ID
+                && reservations[index].Reservation_Description == reservation.Reservation_Description)
+            {
+                reservation = reservations[index];
+                break;
+            }
+        }
+        PaymentModel payment = new PaymentModel
+        {
+            Payment_Date = DateTime.Now,
+            Reservation_ID = reservation.Reservation_ID,
+            Payment_Pay = false
+        };
+        await PaymentDB.InsertPayment(payment);
+
+        alert = "Booking successfully!";
+    }
+
+    public void CloseAlert()
+    {
+        alert = String.Empty;
+    }
+}

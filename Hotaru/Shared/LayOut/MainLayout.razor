@@ -1,0 +1,88 @@
+﻿@inherits LayoutComponentBase
+@inject NavigationManager nvg
+@inject BlazorStrap.IBootstrapCss BootstrapCss
+
+<div class="main">
+    <div class="top-row px-4 fixed-top">
+        <BSButton Class="ml-5" Color="Color.Link" @onclick="@(() => AboutUsModal.Show())">AboutUs</BSButton>
+        <BSButton Class="ml-5" Color="Color.Link" @onclick="@(() => ContactUsModal.Show())">ContactUs</BSButton>
+        <BSButton Class="ml-5" Color="Color.Primary" @onclick="nvgToLogin">Login</BSButton>
+        <BSButton Class="ml-5" Color="Color.Secondary" @onclick="nvgToRegister">Register</BSButton>
+    </div>
+
+    <div class="content px-4">
+        @Body
+    </div>
+<BSModal @ref="AboutUsModal">
+
+    <BSModalHeader OnClick="@(() => AboutUsModal.Hide())">We are UIT student</BSModalHeader>
+
+    <BSModalBody>
+        <p>Pham Thang Long id: 18521051</p>
+        <p>Hoang The Ky id: 18520964</p>
+        <p>Nguyen Luong Kien id: 18520955</p>
+    </BSModalBody>
+
+    <BSModalFooter>
+
+        <BSButton Color="Color.Secondary" @onclick="@(() => AboutUsModal.Hide())">Close</BSButton>
+
+    </BSModalFooter>
+
+</BSModal>
+<BSModal @ref="ContactUsModal">
+
+    <BSModalHeader OnClick="@(() => ContactUsModal.Hide())">Modal title</BSModalHeader>
+
+    <BSModalBody>
+        <p>Pham Thang Long phone-number: 0982481842</p>
+        <p>Hoang The Ky phone-number: ...</p>
+        <p>Nguyen Luong Kien phone-number: 0352055851</p>
+    </BSModalBody>
+
+    <BSModalFooter>
+
+        <BSButton Color="Color.Secondary" @onclick="@(() => ContactUsModal.Hide())">Close</BSButton>
+
+    </BSModalFooter>
+
+</BSModal>
+</div>
+@code{
+    private bool isServerSide = false;
+
+    BSModal AboutUsModal;
+
+    BSModal ContactUsModal;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            await BootstrapCss.SetBootstrapCss("4.3.2");
+        }
+        catch
+        {
+            isServerSide = true;
+        }
+    }
+
+
+    protected override async Task OnAfterRenderAsync(bool firstrun)
+    {
+        if (isServerSide && firstrun)
+        {
+            await BootstrapCss.SetBootstrapCss("4.3.2");
+        }
+    }
+
+    public void nvgToLogin()
+    {
+        nvg.NavigateTo("/login");
+    }
+
+    public void nvgToRegister()
+    {
+        nvg.NavigateTo("/register");
+    }
+}

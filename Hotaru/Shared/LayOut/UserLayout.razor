@@ -1,0 +1,66 @@
+﻿@inherits LayoutComponentBase
+@inject NavigationManager nvg
+
+<div class="sidebar">
+    <UserNavMenu />
+</div>
+
+<div class="main">
+    <div class="top-row px-4 fixed-top">
+        <BSNav IsList="true">
+            <BSButton Class="ml-5" Color="Color.Link" @onclick="@(() => AboutUsModal.Show())">AboutUs</BSButton>
+            <BSButton Class="ml-5" Color="Color.Link" @onclick="@(() => ContactUsModal.Show())">ContactUs</BSButton>
+            <BSButton Class="ml-5" Color="Color.Primary" @onclick="nvgToHome">Logout <span class="oi oi-account-logout"></span></BSButton>
+        </BSNav>
+    </div>
+    <BSModal @ref="AboutUsModal">
+
+        <BSModalHeader OnClick="@(() => AboutUsModal.Hide())">We are UIT student</BSModalHeader>
+
+        <BSModalBody>
+            <p>Pham Thang Long id: 18521051</p>
+            <p>Hoang The Ky id: ...</p>
+            <p>Nguyen Luong Kien id: ...</p>
+        </BSModalBody>
+
+        <BSModalFooter>
+
+            <BSButton Color="Color.Secondary" @onclick="@(() => AboutUsModal.Hide())">Close</BSButton>
+
+        </BSModalFooter>
+
+    </BSModal>
+    <BSModal @ref="ContactUsModal">
+
+        <BSModalHeader OnClick="@(() => ContactUsModal.Hide())">Modal title</BSModalHeader>
+
+        <BSModalBody>
+            <p>Pham Thang Long phone-number: 0982481842</p>
+            <p>Hoang The Ky phone-number: ...</p>
+            <p>Nguyen Luong Kien phone-number: ...</p>
+        </BSModalBody>
+
+        <BSModalFooter>
+
+            <BSButton Color="Color.Secondary" @onclick="@(() => ContactUsModal.Hide())">Close</BSButton>
+
+        </BSModalFooter>
+
+    </BSModal>
+    <div class="content px-4">
+        @Body
+    </div>
+</div>
+
+@code{
+
+    BSModal AboutUsModal;
+
+    BSModal ContactUsModal;
+
+
+    public void nvgToHome()
+    {
+        nvg.NavigateTo("/");
+    }
+}

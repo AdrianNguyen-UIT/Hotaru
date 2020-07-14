@@ -1,0 +1,343 @@
+﻿@page "/manager/hotel"
+@layout Hotaru.Shared.LayOut.ManagerLayout
+
+@using DataAccessLibrary;
+@using DataAccessLibrary.Models;
+@using Hotaru.DisplayModels;
+
+@inject IRoomData RoomDB;
+@inject IHotelData HotelDB;
+@inject IRoomTypeData RoomTypeDB;
+@inject IRoomStateData RoomStateDB;
+@inject IImageData ImageDB;
+
+<div class="main">
+    <div>
+        @if (!isEdit)
+        {
+            <h3><span class="mr-2 oi oi-person"></span>Information</h3>
+            <div class="row">
+                <div class="col-5 pb-3">Name:</div>
+                <div class="col-7 pb-3">@hotel.Hotel_Name</div>
+                <div class="col-5 pb-3">Address:</div>
+                <div class="col-7 pb-3">@hotel.Hotel_Location</div>
+                <div class="col-5 pb-3">Phone Number:</div>
+                <div class="col-7 pb-3">@hotel.Hotel_PhoneNumber</div>
+                <div class="col-5 pb-3">Email:</div>
+                <div class="col-7 pb-3">@hotel.Hotel_EmailAddress</div>
+                <div class="col-5 pb-3">Description:</div>
+                <div class="col-7 pb-3">@hotel.Hotel_Description</div>
+                <BSButton Color="Color.Info" Size="Size.Large" @onclick="Editing">Edit<span class="oi oi-pencil"></span></BSButton>
+            </div>
+        }
+        else
+        {
+            <div class="row">
+                <div class="col-5 pb-3">Name:</div>
+                <div class="col-7 pb-3">
+                    <BSBasicInput InputType="InputType.Text" @bind-Value="@editedHotel.Hotel_Name"></BSBasicInput>
+                </div>
+                <div class="col-5 pb-3">Address:</div>
+                <div class="col-7 pb-3">
+                    <BSBasicInput InputType="InputType.Text" @bind-Value="@editedHotel.Hotel_Location"></BSBasicInput>
+                </div>
+                <div class="col-5 pb-3">Phone Number:</div>
+                <div class="col-7 pb-3">
+                    <BSBasicInput InputType="InputType.Tel" @bind-Value="@editedHotel.Hotel_PhoneNumber"></BSBasicInput>
+                </div>
+                <div class="col-5 pb-3">Email:</div>
+                <div class="col-7 pb-3">
+                    <BSBasicInput InputType="InputType.Email" @bind-Value="@editedHotel.Hotel_EmailAddress"></BSBasicInput>
+                </div>
+                <div class="col-5 pb-3">Description:</div>
+                <div class="col-7 pb-3">
+                    <BSBasicInput InputType="InputType.Text" @bind-Value="@editedHotel.Hotel_Description"></BSBasicInput>
+                </div>
+                <BSButton Color="Color.Info" Size="Size.Large" Class="float-right" @onclick="SaveEdit">Save changes</BSButton>
+                <BSButton Color="Color.Danger" Size="Size.Large" Class="float-right" @onclick="CancelEdit">Cancel</BSButton>
+            </div>
+        }
+    </div>
+    <hr />
+    <div>
+        <div class="container-fluid p-3 my-4 border rounded">
+            <h3>Insert Room</h3>
+            <EditForm Model="@newRoom" OnValidSubmit="@InsertRoom">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+                <div class="form-group">
+                    <label for="roomNumber">Room Name:</label>
+                    <InputText id="roomNumber" class="form-control" placeholder="Enter Room Name" @bind-Value="@newRoom.Room_Number" />
+                </div>
+                <div class="form-group">
+                    <label for="roomType">Room Type:</label>
+                    <InputSelect id="roomType" class="form-control" @bind-Value="@newRoom.RoomType_ID">
+                        @{for (int index = 0; index < roomTypes.Count; index++)
+                            {
+                                <option value="@roomTypes[index].RoomType_ID.ToString()">@roomTypes[index].RoomType_Name.ToString()</option>
+                            }
+                        }
+                    </InputSelect>
+                    @{
+                        for (int index = 0; index < roomStates.Count; index++)
+                        {
+                            if (roomStates[index].RoomState_Marked == true)
+                            {
+                                newRoom.RoomState_ID = roomStates[index].RoomState_ID.ToString();
+                            }
+                        }
+                    }
+                </div>
+                <button type="submit" class="btn btn-primary">Insert</button>
+            </EditForm>
+        </div>
+        <div class="container-fluid p-3 my-4 border rounded">
+            <h3>Delete Room</h3>
+            <EditForm Model="@newRoom" OnValidSubmit="@DeleteRoom">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+                <div class="form-group">
+                    <label for="room">Choose Room:</label>
+                    <InputSelect id="room" class="form-control" @bind-Value="@newRoom.Room_ID">
+                        @{for (int index = 0; index < hotelRooms.Count; index++)
+                            {
+                                <option value="@hotelRooms[index].Room_ID.ToString()">@hotelRooms[index].Room_Number</option>
+                            }
+                        }
+                    </InputSelect>
+                </div>
+                <button type="submit" class="btn btn-primary">Delete</button>
+            </EditForm>
+        </div>
+        <div>
+            <h3><span class="mr-2 oi oi-info"></span>Room List</h3>
+            <table class="table table-striped">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Room Number</th>
+                        <th>Room Type</th>
+                        <th>Bed Type</th>
+                        <th>Number Of Beds</th>
+                        <th>Capacity</th>
+                        <th>Price</th>
+                        <th>Room State</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (int index = 0; index < hotelRooms.Count; index++)
+                    {
+                        <tr>
+                            <td>@hotelRooms[index].Room_Number</td>
+                            <td>@hotelRoomTypes[index].RoomType_Name</td>
+                            <td>@hotelRoomTypes[index].RoomType_BedType</td>
+                            <td>@hotelRoomTypes[index].RoomType_NumberOfBed</td>
+                            <td>@hotelRoomTypes[index].RoomType_Capacity</td>
+                            <td>@hotelRoomTypes[index].RoomType_Price</td>
+                            <td>@hotelRoomStates[index].RoomState_Name</td>
+                            <td>@hotelRoomStates[index].RoomState_Description</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <hr />
+</div>
+
+
+@code {
+
+    bool isEdit = false;
+
+    DisplayRoomModel newRoom = new DisplayRoomModel();
+
+    HotelModel hotel = new HotelModel();
+    HotelModel editedHotel = new HotelModel();
+    ImageModel image = new ImageModel();
+
+    List<RoomModel> hotelRooms = new List<RoomModel>();
+
+    List<RoomTypeModel> hotelRoomTypes = new List<RoomTypeModel>();
+    List<RoomStateModel> hotelRoomStates = new List<RoomStateModel>();
+
+    List<RoomTypeModel> roomTypes = new List<RoomTypeModel>();
+    List<RoomStateModel> roomStates = new List<RoomStateModel>();
+
+
+    private void Editing()
+    {
+        isEdit = true;
+    }
+
+    private void CancelEdit()
+    {
+        isEdit = false;
+        editedHotel = hotel;
+    }
+
+    private async Task SaveEdit()
+    {
+        isEdit = false;
+
+        await HotelDB.UpdateHotel(editedHotel);
+        List<HotelModel> hotels = await HotelDB.GetHotels();
+        for (int index = 0; index < hotels.Count; index++)
+        {
+            if (hotels[index].Hotel_ID == CurrentInfo.Hotel_ID)
+            {
+                hotel = hotels[index];
+                editedHotel = hotel;
+                break;
+            }
+        }
+    }
+
+    private async Task InsertRoom()
+    {
+
+        RoomModel nRoom = new RoomModel
+        {
+            Room_Number = newRoom.Room_Number,
+            RoomType_ID = int.Parse(newRoom.RoomType_ID),
+            RoomState_ID = int.Parse(newRoom.RoomState_ID)
+        };
+        await RoomDB.InsertRoom(nRoom);
+
+        hotelRooms.Clear();
+        hotelRoomTypes.Clear();
+        hotelRoomStates.Clear();
+        List<RoomModel> rooms = await RoomDB.GetRooms();
+        for (int roomIndex = 0; roomIndex < rooms.Count; roomIndex++)
+        {
+            if (rooms[roomIndex].Hotel_ID == hotel.Hotel_ID)
+            {
+                hotelRooms.Add(rooms[roomIndex]);
+
+                for (int roomTypeIndex = 0; roomTypeIndex < roomTypes.Count; roomTypeIndex++)
+                {
+                    if (roomTypes[roomTypeIndex].RoomType_ID == rooms[roomIndex].RoomType_ID)
+                    {
+                        hotelRoomTypes.Add(roomTypes[roomTypeIndex]);
+                        break;
+                    }
+                }
+
+                for (int roomStateIndex = 0; roomStateIndex < roomStates.Count; roomStateIndex++)
+                {
+                    if (roomStates[roomStateIndex].RoomState_ID == rooms[roomIndex].RoomState_ID)
+                    {
+                        hotelRoomStates.Add(roomStates[roomStateIndex]);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    private async Task DeleteRoom()
+    {
+        RoomModel nRoom = new RoomModel
+        {
+            Room_ID = int.Parse(newRoom.Room_ID)
+        };
+        await RoomDB.DeleteRoom(nRoom);
+
+        List<RoomModel> rooms = await RoomDB.GetRooms();
+        for (int roomIndex = 0; roomIndex < rooms.Count; roomIndex++)
+        {
+            if (rooms[roomIndex].Hotel_ID == hotel.Hotel_ID)
+            {
+                hotelRooms.Add(rooms[roomIndex]);
+
+                for (int roomTypeIndex = 0; roomTypeIndex < roomTypes.Count; roomTypeIndex++)
+                {
+                    if (roomTypes[roomTypeIndex].RoomType_ID == rooms[roomIndex].RoomType_ID)
+                    {
+                        hotelRoomTypes.Add(roomTypes[roomTypeIndex]);
+                        break;
+                    }
+                }
+
+                for (int roomStateIndex = 0; roomStateIndex < roomStates.Count; roomStateIndex++)
+                {
+                    if (roomStates[roomStateIndex].RoomState_ID == rooms[roomIndex].RoomState_ID)
+                    {
+                        hotelRoomStates.Add(roomStates[roomStateIndex]);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        List<HotelModel> hotels = await HotelDB.GetHotels();
+        List<RoomModel> rooms = await RoomDB.GetRooms();
+        List<RoomTypeModel> temptRoomTypes = await RoomTypeDB.GetRoomTypes();
+        List<RoomStateModel> temptRoomStates = await RoomStateDB.GetRoomStates();
+        List<ImageModel> images = await ImageDB.GetImages();
+
+        for (int index = 0; index < hotels.Count; index++)
+        {
+            if (hotels[index].Hotel_ID == CurrentInfo.Hotel_ID)
+            {
+                hotel = hotels[index];
+                editedHotel = hotel;
+                break;
+            }
+        }
+
+        for (int roomIndex = 0; roomIndex < rooms.Count; roomIndex++)
+        {
+            if (rooms[roomIndex].Hotel_ID == hotel.Hotel_ID)
+            {
+                hotelRooms.Add(rooms[roomIndex]);
+
+                for (int roomTypeIndex = 0; roomTypeIndex < temptRoomTypes.Count; roomTypeIndex++)
+                {
+                    if (temptRoomTypes[roomTypeIndex].RoomType_ID == rooms[roomIndex].RoomType_ID)
+                    {
+                        hotelRoomTypes.Add(temptRoomTypes[roomTypeIndex]);
+                        break;
+                    }
+                }
+
+                for (int roomStateIndex = 0; roomStateIndex < temptRoomStates.Count; roomStateIndex++)
+                {
+                    if (temptRoomStates[roomStateIndex].RoomState_ID == rooms[roomIndex].RoomState_ID)
+                    {
+                        hotelRoomStates.Add(temptRoomStates[roomStateIndex]);
+                        break;
+                    }
+                }
+            }
+        }
+
+        for (int roomTypeIndex = 0; roomTypeIndex < temptRoomTypes.Count; roomTypeIndex++)
+        {
+            if (temptRoomTypes[roomTypeIndex].Hotel_ID == CurrentInfo.Hotel_ID)
+            {
+                roomTypes.Add(temptRoomTypes[roomTypeIndex]);
+            }
+        }
+
+        for (int roomStateIndex = 0; roomStateIndex < temptRoomStates.Count; roomStateIndex++)
+        {
+            if (temptRoomStates[roomStateIndex].Hotel_ID == CurrentInfo.Hotel_ID)
+            {
+                roomStates.Add(temptRoomStates[roomStateIndex]);
+            }
+        }
+
+        for (int imageIndex = 0; imageIndex < images.Count; imageIndex++)
+        {
+            if (images[imageIndex].Hotel_ID == hotel.Hotel_ID)
+            {
+                image = images[imageIndex];
+                break;
+            }
+        }
+    }
+}

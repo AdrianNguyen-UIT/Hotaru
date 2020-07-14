@@ -1,0 +1,290 @@
+﻿@page "/user/hotelbooking"
+@page "/user/hotelbooking/{pageId:int}"
+@layout Hotaru.Shared.LayOut.UserLayout
+@inject NavigationManager nvg
+
+@using DataAccessLibrary;
+@using DataAccessLibrary.Models;
+@using Hotaru.DisplayModels;
+
+@inject IHotelData HotelDB;
+@inject IImageData ImageDB;
+
+<div class="main">
+    <div class="col-12">
+        @if ((PageId != model.MaxPages - 1) || (model.MaxObject % model.ObjectEachPage == 0))
+        {
+            for (int i = 0; i < model.ObjectEachPage / 2; i++)
+            {
+                int object1 = PageId * model.ObjectEachPage + 1 + i * 2;
+                int object2 = object1 + 1;
+                <div class="row">
+                    @if (object1 < hotels.Count)
+                    {
+                        <div class="media pb-5 col-6">
+                            <img class="mr-3 img-thumbnail" src="@images[object1].HotelImage_Source" alt="Hotel's placeholder image" style="width:200px;height:200px;">
+                            <div class="media-body">
+                                <h3 class="mt-0">@hotels[object1].Hotel_Name</h3>
+                                Address: @hotels[object1].Hotel_Location
+                            </div>
+                            <div>
+                                <BSButton Color=Color.Primary Size=Size.Large OnClick="() => Navigate(object1)">Reserve</BSButton>
+                            </div>
+                        </div>
+                    }
+                    @if (object2 < hotels.Count)
+                    {
+                <div class="media pb-5 col-6">
+                    <img class="mr-3 img-thumbnail" src="@images[object2].HotelImage_Source" alt="Hotel's placeholder image" style="width:200px;height:200px;">
+                    <div class="media-body">
+                        <h3 class="mt-0">@hotels[object2].Hotel_Name</h3>
+                        Address: @hotels[object2].Hotel_Location
+                    </div>
+                    <div>
+                        <BSButton Color=Color.Primary Size=Size.Large OnClick="() => Navigate(object2)">Reserve</BSButton>
+                    </div>
+                </div>
+                     }
+                </div>
+            }
+         }
+        else
+        {
+            for (int i = 0; i < (model.MaxObject % model.ObjectEachPage + 1) / 2; i++)
+            {
+                int object1 = PageId * model.ObjectEachPage + 1 + i * 2;
+                int object2 = object1 + 1;
+                <div class="row">
+                    @if (object1 < hotels.Count)
+                    {
+                    <div class="media pb-5 col-6">
+                        <img class="mr-3 img-thumbnail" src="@images[object1].HotelImage_Source" alt="Generic placeholder image" style="width:200px;height:200px;">
+                        <div class="media-body">
+                            <h3 class="mt-0">@hotels[object1].Hotel_Name</h3>
+                            Address: @hotels[object1].Hotel_Location
+                        </div>
+                        <div>
+                            <BSButton Color=Color.Primary Size=Size.Large OnClick="() => Navigate(object1)">Reserve</BSButton>
+                        </div>
+                    </div>
+                    }
+                    @if (object2 < hotels.Count)
+                    {
+                <div class="media pb-5 col-6">
+                    <img class="mr-3 img-thumbnail" src="@images[object2].HotelImage_Source" alt="Generic placeholder image" style="width:200px;height:200px;">
+                    <div class="media-body">
+                        <h3 class="mt-0">@hotels[object2].Hotel_Name</h3>
+                        Address: @hotels[object2].Hotel_Location
+                    </div>
+                    <div>
+                        <BSButton Color=Color.Primary Size=Size.Large OnClick="() => Navigate(object2)">Reserve</BSButton>
+                    </div>
+                </div>
+                    }
+                </div>
+            }
+        }
+    </div>
+    <div class="col-12 ">
+        <BSPagination Alignment="Alignment.Center">
+            <BSPaginationItem IsDisabled="IsFirstPage()">
+
+                <BSPaginationLink Href="@URLPage(PageId-1)" PaginationLinkType="PaginationLinkType.PreviousText"></BSPaginationLink>
+
+            </BSPaginationItem>
+            @if (model.MaxPages < 10)
+                for (int i = 0; i < model.MaxPages; i++)
+                {
+                    if (PageId == i)
+                    {
+                        int numPage = i;
+                        <BSPaginationItem IsActive="true">
+
+                            <BSPaginationLink Href="@URLPage(numPage)">@numPage</BSPaginationLink>
+
+                        </BSPaginationItem>
+                    }
+                    else
+                    {
+                        int numPage = i;
+                        <BSPaginationItem IsActive="false">
+
+                            <BSPaginationLink Href="@URLPage(numPage)">@numPage</BSPaginationLink>
+
+                        </BSPaginationItem>
+                    }
+                }
+            else
+            {
+                if (PageId < 10)
+                {
+                    for (int i = 0; i < 10; i++)
+                    {
+                        if (PageId == i)
+                        {
+                            int numPage = i;
+                            <BSPaginationItem IsActive="true">
+
+                                <BSPaginationLink Href="@URLPage(numPage)">@numPage</BSPaginationLink>
+
+                            </BSPaginationItem>
+                        }
+                        else
+                        {
+                            int numPage = i;
+                            <BSPaginationItem IsActive="false">
+
+                                <BSPaginationLink Href="@URLPage(numPage)">@numPage</BSPaginationLink>
+
+                            </BSPaginationItem>
+                        }
+                    }
+                    <BSPaginationItem IsDisabled="true">
+
+                        <BSPaginationLink Href="">...</BSPaginationLink>
+
+                    </BSPaginationItem>
+                }
+                else
+                {
+                    if (PageId != model.MaxPages - 1)
+                    {
+                        <BSPaginationItem IsDisabled="true">
+
+                            <BSPaginationLink Href="">...</BSPaginationLink>
+
+                        </BSPaginationItem>
+                        for (int i = PageId - 9; i < PageId + 1; i++)
+                        {
+                            if (PageId == i)
+                            {
+                                int numPage = i;
+                                <BSPaginationItem IsActive="true">
+
+                                    <BSPaginationLink Href="@URLPage(numPage)">@numPage</BSPaginationLink>
+
+                                </BSPaginationItem>
+                            }
+                            else
+                            {
+                                int numPage = i;
+                                <BSPaginationItem IsActive="false">
+
+                                    <BSPaginationLink Href="@URLPage(numPage)">@numPage</BSPaginationLink>
+
+                                </BSPaginationItem>
+                            }
+                        }
+                        <BSPaginationItem IsDisabled="true">
+
+                            <BSPaginationLink Href="">...</BSPaginationLink>
+
+                        </BSPaginationItem>
+                    }
+                    else
+                    {
+                        <BSPaginationItem IsDisabled="true">
+
+                            <BSPaginationLink Href="">...</BSPaginationLink>
+
+                        </BSPaginationItem>
+                        for (int i = PageId - 9; i < PageId + 1; i++)
+                        {
+                            if (PageId == i)
+                            {
+                                int numPage = i;
+                                <BSPaginationItem IsActive="true">
+
+                                    <BSPaginationLink Href="@URLPage(numPage)">@numPage</BSPaginationLink>
+
+                                </BSPaginationItem>
+                            }
+                            else
+                            {
+                                int numPage = i;
+                                <BSPaginationItem IsActive="false">
+
+                                    <BSPaginationLink Href="@URLPage(numPage)">@numPage</BSPaginationLink>
+
+                                </BSPaginationItem>
+                            }
+                        }
+                    }
+                }
+            }
+
+            <BSPaginationItem IsDisabled="IsFinalPage()">
+
+                <BSPaginationLink Href="@URLPage(PageId+1)" PaginationLinkType="PaginationLinkType.NextText"></BSPaginationLink>
+
+            </BSPaginationItem>
+
+        </BSPagination>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public int PageId { get; set; }
+
+    Pagination model = new Pagination(1, 1);
+
+    List<HotelModel> hotels = new List<HotelModel>();
+    List<ImageModel> images = new List<ImageModel>();
+
+    void Navigate(int numHotel)
+    {
+        CurrentInfo.Hotel_ID = hotels[numHotel].Hotel_ID;
+        nvg.NavigateTo("/booking/hotel/");
+    }
+
+    string URLPage(int numPage)
+    {
+        string temp = "/user/hotelbooking/" + numPage.ToString();
+        return temp;
+    }
+
+    bool IsFirstPage()
+    {
+        if (PageId == 0) return true;
+        else return false;
+    }
+
+    bool IsFinalPage()
+    {
+        if (PageId == model.MaxPages - 1) return true;
+        else return false;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        hotels = await HotelDB.GetHotels();
+        List<HotelModel> temptHotels = new List<HotelModel>();
+
+        temptHotels.Add(hotels[0]);
+        for (int index = 0; index < hotels.Count; index++)
+        {
+            temptHotels.Add(hotels[index]);
+        }
+        hotels.Clear();
+        hotels = temptHotels;
+
+        images = await ImageDB.GetImages();
+        List<ImageModel> temptImages = new List<ImageModel>();
+
+        for (int hotelIndex = 0; hotelIndex < hotels.Count; hotelIndex++)
+        {
+            for (int imageIndex = 0; imageIndex < images.Count; imageIndex++)
+            {
+                if (images[imageIndex].Hotel_ID == hotels[hotelIndex].Hotel_ID)
+                {
+                    temptImages.Add(images[imageIndex]);
+                    break;
+                }
+            }
+        }
+        images.Clear();
+        images = temptImages;
+        model = new Pagination(hotels.Count, 6);
+    }
+}

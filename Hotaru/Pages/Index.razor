@@ -1,0 +1,33 @@
+﻿@page "/"
+@inject NavigationManager nvg
+<BSJumbotron>
+
+    <h1 class="display-4">Hello, welcome to Hotaru!</h1>
+
+    <p class="lead">To use Hotaru please Login or Register</p>
+
+    <hr class="my-4" />
+
+    <BSButton IsOutline="true" Color=Color.Primary Size=Size.Large @onclick="nvgToLogin">Login</BSButton>
+
+    <BSButton IsOutline="true" Color=Color.Secondary Size=Size.Large @onclick="nvgToRegister">Register</BSButton>
+
+</BSJumbotron>
+
+@code{
+
+    public void nvgToLogin()
+    {
+
+        nvg.NavigateTo("/login");
+
+    }
+
+    public void nvgToRegister()
+    {
+
+        nvg.NavigateTo("/register");
+
+    }
+
+}

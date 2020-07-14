@@ -1,0 +1,318 @@
+﻿@page "/manager/transactionstatictis"
+@page "/manager/transactionstatictis/{pageId:int}"
+@layout Hotaru.Shared.LayOut.ManagerLayout
+@inject NavigationManager nvg
+
+@using DataAccessLibrary;
+@using DataAccessLibrary.Models;
+@using Hotaru.DisplayModels;
+@inject IReservationData ReservationDB;
+@inject IPaymentData PaymentDB;
+@inject IUserData UserDB;
+
+<div class="main">
+    <div class="col-12">
+        @if ((PageId != model.MaxPages - 1) || (model.MaxObject % model.ObjectEachPage == 0))
+        {
+            for (int i = 0; i < model.ObjectEachPage / 2; i++)
+            {
+                int object1 = PageId * model.ObjectEachPage + 1 + i * 2;
+                int object2 = object1 + 1;
+                <div class="row">
+                    @if (object1 < reservations.Count && payments[object1].Payment_Pay)
+                    {
+                        <div class="media pb-5 col-6">
+                            <img class="mr-3 img-thumbnail" src="https://r-cf.bstatic.com/images/hotel/max1024x768/231/231141387.jpg" alt="Generic placeholder image" style="width:200px;height:250px;">
+                            <div class="media-body">
+                                <label>Customer:</label>
+                                <p class="mt-0">@users[object1].User_FirstName @users[object1].User_LastName</p>
+                                <label>Payment Date:</label>
+                                <BSBasicInput InputType="InputType.Date" Value="@payments[object1].Payment_Date" IsDisabled="true"></BSBasicInput>
+                                <label>Total Amount (vnđ):</label>
+                                <p>@payments[object1].Payment_Total</p>
+                                <BSButton Class="p-3" Color=Color.Primary Size=Size.ExtraSmall OnClick="() => Navigate(object1)">Detail</BSButton>
+                            </div>
+                        </div>
+                    }
+                    @if (object2 < reservations.Count && payments[object2].Payment_Pay)
+                    {
+                       <div class="media pb-5 col-6">
+                            <img class="mr-3 img-thumbnail" src="https://r-cf.bstatic.com/images/hotel/max1024x768/231/231141387.jpg" alt="Generic placeholder image" style="width:200px;height:250px;">
+                            <div class="media-body">
+                                <label>Customer:</label>
+                                <p class="mt-0">@users[object2].User_FirstName @users[object2].User_LastName</p>
+                                <label>Payment Date:</label>
+                                <BSBasicInput InputType="InputType.Date" Value="@payments[object2].Payment_Date" IsDisabled="true"></BSBasicInput>
+                                <label>Total Amount (vnđ):</label>
+                                <p>@payments[object2].Payment_Total</p>
+                                <BSButton Class="p-3" Color=Color.Primary Size=Size.ExtraSmall OnClick="() => Navigate(object2)">Detail</BSButton>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        }
+        else
+        {
+            for (int i = 0; i < (model.MaxObject % model.ObjectEachPage + 1) / 2; i++)
+            {
+                int object1 = PageId * model.ObjectEachPage + 1 + i * 2;
+                int object2 = object1 + 1;
+                <div class="row">
+                    @if (object1 < reservations.Count && payments[object1].Payment_Pay)
+                    {
+                        <div class="media pb-5 col-6">
+                            <img class="mr-3 img-thumbnail" src="https://r-cf.bstatic.com/images/hotel/max1024x768/231/231141387.jpg" alt="Generic placeholder image" style="width:200px;height:250px;">
+                            <div class="media-body">
+                                <label>Customer:</label>
+                                <p class="mt-0">@users[object1].User_FirstName @users[object1].User_LastName</p>
+                                <label>Payment Date:</label>
+                                <BSBasicInput InputType="InputType.Date" Value="@payments[object1].Payment_Date" IsDisabled="true"></BSBasicInput>
+                                <label>Total Amount (vnđ):</label>
+                                <p>@payments[object1].Payment_Total</p>
+                                <BSButton Class="p-3" Color=Color.Primary Size=Size.ExtraSmall OnClick="() => Navigate(object1)">Detail</BSButton>
+                            </div>
+                        </div>
+                    }
+                    @if (object2 < reservations.Count && payments[object2].Payment_Pay)
+                    {
+                       <div class="media pb-5 col-6">
+                            <img class="mr-3 img-thumbnail" src="https://r-cf.bstatic.com/images/hotel/max1024x768/231/231141387.jpg" alt="Generic placeholder image" style="width:200px;height:250px;">
+                            <div class="media-body">
+                                <label>Customer:</label>
+                                <p class="mt-0">@users[object2].User_FirstName @users[object2].User_LastName</p>
+                                <label>Payment Date:</label>
+                                <BSBasicInput InputType="InputType.Date" Value="@payments[object2].Payment_Date" IsDisabled="true"></BSBasicInput>
+                                <label>Total Amount (vnđ):</label>
+                                <p>@payments[object2].Payment_Total</p>
+                                <BSButton Class="p-3" Color=Color.Primary Size=Size.ExtraSmall OnClick="() => Navigate(object2)">Detail</BSButton>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        }
+    </div>
+    <BSPagination Alignment="Alignment.Center">
+        <BSPaginationItem IsDisabled="IsFirstPage()">
+
+            <BSPaginationLink Href="@URLPage(PageId-1)" PaginationLinkType="PaginationLinkType.PreviousText"></BSPaginationLink>
+
+        </BSPaginationItem>
+        @if (model.MaxPages < 10)
+            for (int i = 0; i < model.MaxPages; i++)
+            {
+                if (PageId == i)
+                {
+                    int numPage = i;
+                    <BSPaginationItem IsActive="true">
+
+                        <BSPaginationLink Href="@URLPage(numPage)">@numPage</BSPaginationLink>
+
+                    </BSPaginationItem>
+                }
+                else
+                {
+                    int numPage = i;
+                    <BSPaginationItem IsActive="false">
+
+                        <BSPaginationLink Href="@URLPage(numPage)">@numPage</BSPaginationLink>
+
+                    </BSPaginationItem>
+                }
+            }
+        else
+        {
+            if (PageId < 10)
+            {
+                for (int i = 0; i < 10; i++)
+                {
+                    if (PageId == i)
+                    {
+                        int numPage = i;
+                        <BSPaginationItem IsActive="true">
+
+                            <BSPaginationLink Href="@URLPage(numPage)">@numPage</BSPaginationLink>
+
+                        </BSPaginationItem>
+                    }
+                    else
+                    {
+                        int numPage = i;
+                        <BSPaginationItem IsActive="false">
+
+                            <BSPaginationLink Href="@URLPage(numPage)">@numPage</BSPaginationLink>
+
+                        </BSPaginationItem>
+                    }
+                }
+                <BSPaginationItem IsDisabled="true">
+
+                    <BSPaginationLink Href="">...</BSPaginationLink>
+
+                </BSPaginationItem>
+            }
+            else
+            {
+                if (PageId != model.MaxPages - 1)
+                {
+                    <BSPaginationItem IsDisabled="true">
+
+                        <BSPaginationLink Href="">...</BSPaginationLink>
+
+                    </BSPaginationItem>
+                    for (int i = PageId - 9; i < PageId + 1; i++)
+                    {
+                        if (PageId == i)
+                        {
+                            int numPage = i;
+                            <BSPaginationItem IsActive="true">
+
+                                <BSPaginationLink Href="@URLPage(numPage)">@numPage</BSPaginationLink>
+
+                            </BSPaginationItem>
+                        }
+                        else
+                        {
+                            int numPage = i;
+                            <BSPaginationItem IsActive="false">
+
+                                <BSPaginationLink Href="@URLPage(numPage)">@numPage</BSPaginationLink>
+
+                            </BSPaginationItem>
+                        }
+                    }
+                    <BSPaginationItem IsDisabled="true">
+
+                        <BSPaginationLink Href="">...</BSPaginationLink>
+
+                    </BSPaginationItem>
+                }
+                else
+                {
+                    <BSPaginationItem IsDisabled="true">
+
+                        <BSPaginationLink Href="">...</BSPaginationLink>
+
+                    </BSPaginationItem>
+                    for (int i = PageId - 9; i < PageId + 1; i++)
+                    {
+                        if (PageId == i)
+                        {
+                            int numPage = i;
+                            <BSPaginationItem IsActive="true">
+
+                                <BSPaginationLink Href="@URLPage(numPage)">@numPage</BSPaginationLink>
+
+                            </BSPaginationItem>
+                        }
+                        else
+                        {
+                            int numPage = i;
+                            <BSPaginationItem IsActive="false">
+
+                                <BSPaginationLink Href="@URLPage(numPage)">@numPage</BSPaginationLink>
+
+                            </BSPaginationItem>
+                        }
+                    }
+                }
+            }
+        }
+
+        <BSPaginationItem IsDisabled="IsFinalPage()">
+
+            <BSPaginationLink Href="@URLPage(PageId+1)" PaginationLinkType="PaginationLinkType.NextText"></BSPaginationLink>
+
+        </BSPaginationItem>
+
+    </BSPagination>
+</div>
+@code {
+
+    [Parameter]
+    public int PageId { get; set; }
+
+    Pagination model = new Pagination(1, 1);
+
+    List<ReservationModel> reservations = new List<ReservationModel>();
+    List<UserModel> users = new List<UserModel>();
+    List<PaymentModel> payments = new List<PaymentModel>();
+
+    string URLPage(int numPage)
+    {
+        string temp = "/manager/transactionstatictis/" + numPage.ToString();
+        return temp;
+    }
+
+    bool IsFirstPage()
+    {
+        if (PageId == 0) return true;
+        else return false;
+    }
+
+    bool IsFinalPage()
+    {
+        if (PageId == model.MaxPages - 1) return true;
+        else return false;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        reservations = await ReservationDB.GetReservations();
+        users = await UserDB.GetUsers();
+        payments = await PaymentDB.GetPayments();
+
+        List<ReservationModel> temptReservations = new List<ReservationModel>();
+        List<UserModel> temptUsers = new List<UserModel>();
+        List<PaymentModel> temptPayments = new List<PaymentModel>();
+
+        for (int index = 0; index < reservations.Count; index++)
+        {
+            if (reservations[index].Hotel_ID == CurrentInfo.Hotel_ID)
+            {
+                if (temptReservations.Count == 0)
+                {
+                    temptReservations.Add(reservations[index]);
+                }
+                temptReservations.Add(reservations[index]);
+            }
+        }
+        reservations.Clear();
+        reservations = temptReservations;
+        model = new Pagination(temptReservations.Count, 8);
+
+        for (int reservationIndex = 0; reservationIndex < reservations.Count; reservationIndex++)
+        {
+            for (int userIndex = 0; userIndex < users.Count; userIndex++)
+            {
+                if (users[userIndex].User_ID == reservations[reservationIndex].User_ID)
+                {
+                    temptUsers.Add(users[userIndex]);
+                }
+            }
+        }
+        users.Clear();
+        users = temptUsers;
+
+        for (int reservationIndex = 0; reservationIndex < reservations.Count; reservationIndex++)
+        {
+            for (int paymentIndex = 0; paymentIndex < payments.Count; paymentIndex++)
+            {
+                if (payments[paymentIndex].Reservation_ID == reservations[reservationIndex].Reservation_ID)
+                {
+                    temptPayments.Add(payments[paymentIndex]);
+                }
+            }
+        }
+        payments.Clear();
+        payments = temptPayments;
+    }
+
+    void Navigate(int num)
+    {
+        CurrentInfo.Reservation_ID = reservations[num].Reservation_ID;
+        nvg.NavigateTo("/manager/transactionobjectview");
+    }
+}
+

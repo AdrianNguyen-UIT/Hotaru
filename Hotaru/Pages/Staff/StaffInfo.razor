@@ -1,0 +1,292 @@
+﻿@page "/staff/information"
+@page "/staff"
+@layout Hotaru.Shared.LayOut.StaffLayout
+
+@using DataAccessLibrary;
+@using DataAccessLibrary.Models;
+@using Hotaru.DisplayModels;
+
+@inject IStaffData StaffDB;
+@inject ILoginData LoginDB;
+@inject IHotelEmployeeData HotelEmployeeDB;
+@inject IHotelData HotelDB;
+
+<div class="main">
+    <div class="row">
+        <div class="col-4">
+            <BSCard CardType="CardType.Card">
+
+                <BSCard CardType="CardType.Image" VerticalAlignment="VerticalAlignment.Top" src="https://image.shutterstock.com/image-vector/silhouette-people-unknown-male-person-260nw-1372192277.jpg" alt="Card image cap" />
+
+                <BSCard CardType="CardType.Body">
+                    <BSCard CardType="CardType.Title">@staff.User_FirstName</BSCard>
+                    <BSCard CardType="CardType.Title">@staff.User_LastName</BSCard>
+                    <BSCard CardType="CardType.Subtitle">@hotel.Hotel_Name, Staff</BSCard>
+                    <BSCard CardType="CardType.Subtitle">@staff.User_EmailAddress</BSCard>
+                    <BSCard CardType="CardType.Subtitle">@staff.User_PhoneNumber</BSCard>
+                    <BSCard CardType="CardType.Subtitle">@staff.User_Gender</BSCard>
+                    <BSCard CardType="CardType.Subtitle">@staff.User_Birthday</BSCard>
+                    <br />
+                    <BSButton>Change Photo</BSButton>
+                </BSCard>
+            </BSCard>
+        </div>
+        <div class="col-8 pd-20">
+            <h3>
+                <span class="mr-2 oi oi-person"></span>
+                About
+            </h3>
+            @if (!isEdit)
+            {
+                <div class="row">
+                    <div class="col-5 pb-3">First Name:</div><div class="col-7 pb-3">@staff.User_FirstName</div>
+                    <div class="col-5 pb-3">Last Name:</div><div class="col-7 pb-3">@staff.User_LastName</div>
+                    <div class="col-5 pb-3">Email:</div><div class="col-7 pb-3">@staff.User_EmailAddress</div>
+                    <div class="col-5 pb-3">Phone Number:</div><div class="col-7 pb-3">@staff.User_PhoneNumber</div>
+                    <div class="col-5 pb-3">Gender</div><div class="col-7 pb-3">@staff.User_Gender</div>
+                    <div class="col-5 pb-3">Birthday</div><div class="col-7 pb-3">@staff.User_Birthday</div>
+                </div>
+            }
+            else
+            {
+                <div class="row">
+                    @if (isEmpty)
+                    {
+                        <div class="col-12 pb-3">
+                            <h6>Form can not be empty</h6>
+                            <br />
+                        </div>
+                    }
+                    <div class="col-5 pb-3">First Name:</div>
+                    <div class="col-7 pb-3">
+                        <BSBasicInput InputType="InputType.Text" @bind-Value="@editedStaff.User_FirstName"></BSBasicInput>
+                    </div>
+                    <div class="col-5 pb-3">Last Name:</div>
+                    <div class="col-7 pb-3">
+                        <BSBasicInput InputType="InputType.Text" @bind-Value="@editedStaff.User_LastName"></BSBasicInput>
+                    </div>
+                    <div class="col-5 pb-3">Email:</div>
+                    <div class="col-7 pb-3">
+                        <BSBasicInput InputType="InputType.Email" @bind-Value="@editedStaff.User_EmailAddress"></BSBasicInput>
+                    </div>
+                    <div class="col-5 pb-3">Phone Number:</div>
+                    <div class="col-7 pb-3">
+                        <BSBasicInput InputType="InputType.Tel" @bind-Value="@editedStaff.User_PhoneNumber"></BSBasicInput>
+                    </div>
+                    <div class="col-5 pb-3">Gender:</div>
+                    <div class="col-7 pb-3">
+                        <BSBasicInput InputType="InputType.Select" @bind-Value="@editedStaff.User_Gender">
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </BSBasicInput>
+                    </div>
+                    <div class="col-5 pb-3">Birthday:</div>
+                    <div class="col-7 pb-3">
+                        <BSBasicInput InputType="InputType.Date" @bind-Value="@editedStaff.User_Birthday"></BSBasicInput>
+                    </div>
+                    <BSButton Color="Color.Info" Size="Size.Large" Class="float-right" @onclick="SaveEdit">Save changes</BSButton>
+                    <BSButton Color="Color.Danger" Size="Size.Large" Class="float-right" @onclick="CancelEdit">Cancel</BSButton>
+                </div>
+            }
+            <hr />
+            @if (isChangingPassword)
+            {
+                <div class="row">
+                    @if (wrongPass)
+                    {
+                        <div class="col-12 pb-3">
+                            <h6>Password is wrong, please re-enter your password</h6>
+                            <br />
+                        </div>
+                    }
+                    @if (misMatch && wrongPass == false)
+                    {
+                        <div class="col-12 pb-3">
+                            <h6>Password mismatch or password is not enough length, please re-enter</h6>
+                            <br />
+                        </div>
+                    }
+                    <div class="col-5 pb-3">Old Password:</div>
+                    <div class="col-7 pb-3">
+                        <BSBasicInput InputType="InputType.Password" @bind-Value="oldPassword"></BSBasicInput>
+                    </div>
+                    <div class="col-5 pb-3">New Password:</div>
+                    <div class="col-7 pb-3">
+                        <BSBasicInput InputType="InputType.Password" @bind-Value="newPassword"></BSBasicInput>
+                    </div>
+                    <div class="col-5 pb-3">Confirm Password:</div>
+                    <div class="col-7 pb-3">
+                        <BSBasicInput InputType="InputType.Password" @bind-Value="confirmNewPassword"></BSBasicInput>
+                    </div>
+                    <BSButton Color="Color.Info" Size="Size.Large" Class="float-right" @onclick="SavePassword">Save Password</BSButton>
+                    <BSButton Color="Color.Danger" Size="Size.Large" Class="float-right" @onclick="CancelChange">Cancel</BSButton>
+                </div>
+                <hr />
+            }
+            @if (!isEdit)
+            {
+                <BSButton Color="Color.Info" Size="Size.Large" Class="float-right" @onclick="Editing">Edit<span class="oi oi-pencil"></span></BSButton>
+            }
+            @if (!isChangingPassword)
+            {
+                <BSButton Color="Color.Danger" Size="Size.Large" Class="float-right" @onclick="ChangingPassword">Change Password<span class="oi oi-cog"></span></BSButton>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+
+    StaffModel staff = new StaffModel();
+    StaffModel editedStaff = new StaffModel();
+    LoginModel login = new LoginModel();
+    HotelModel hotel = new HotelModel();
+
+    bool isEdit = false;
+    bool isChangingPassword = false;
+    bool wrongPass = false;
+    bool misMatch = false;
+    bool isEmpty = false;
+
+    string oldPassword = string.Empty;
+    string newPassword = string.Empty;
+    string confirmNewPassword = string.Empty;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        List<StaffModel> staffs = await StaffDB.GetStaffs();
+        for (int index = 0; index < staffs.Count; index++)
+        {
+            if (staffs[index].User_ID == CurrentInfo.Staff_ID)
+            {
+                staff = staffs[index];
+                editedStaff = staff;
+                break;
+            }
+        }
+        List<LoginModel> logins = await LoginDB.GetLogins();
+        for (int index = 0; index < logins.Count; index++)
+        {
+            if (logins[index].User_ID == CurrentInfo.Staff_ID)
+            {
+                login = logins[index];
+                break;
+            }
+        }
+
+        List<HotelEmployeeModel> hotelEmployees = await HotelEmployeeDB.GetHotelEmployees();
+        for (int index = 0; index < hotelEmployees.Count; index++)
+        {
+            if (hotelEmployees[index].User_ID == CurrentInfo.Staff_ID)
+            {
+                CurrentInfo.Hotel_ID = hotelEmployees[index].Hotel_ID;
+                break;
+            }
+        }
+
+        List<HotelModel> hotels = await HotelDB.GetHotels();
+        for (int index = 0; index < hotels.Count; index++)
+        {
+            if (hotels[index].Hotel_ID == CurrentInfo.Hotel_ID)
+            {
+                hotel = hotels[index];
+                break;
+            }
+        }
+    }
+
+    private void Editing()
+    {
+        isEdit = true;
+    }
+
+    private void CancelEdit()
+    {
+        isEdit = false;
+        editedStaff = staff;
+    }
+
+    private async Task SaveEdit()
+    {
+        if (string.IsNullOrWhiteSpace(editedStaff.User_FirstName)
+            || string.IsNullOrWhiteSpace(editedStaff.User_LastName)
+            || string.IsNullOrWhiteSpace(editedStaff.User_PhoneNumber)
+            || string.IsNullOrWhiteSpace(editedStaff.User_EmailAddress))
+        {
+            isEmpty = true;
+        }
+
+        if (!isEmpty)
+        {
+            isEdit = false;
+
+            await StaffDB.UpdateStaff(editedStaff);
+
+            List<StaffModel> staffs = await StaffDB.GetStaffs();
+            for (int index = 0; index < staffs.Count; index++)
+            {
+                if (staffs[index].User_ID == CurrentInfo.Staff_ID)
+                {
+                    staff = staffs[index];
+                    editedStaff = staff;
+                    break;
+                }
+            }
+        }
+    }
+
+    private void ChangingPassword()
+    {
+        isChangingPassword = true;
+    }
+
+    private async Task SavePassword()
+    {
+        if (oldPassword != login.Login_Password)
+        {
+            wrongPass = true;
+        }
+        else
+        {
+            wrongPass = false;
+        }
+
+        if (newPassword != confirmNewPassword)
+        {
+            misMatch = true;
+        }
+        else
+        {
+            misMatch = false;
+        }
+
+        if (!wrongPass && !misMatch)
+        {
+            isChangingPassword = false;
+            login.Login_Password = newPassword;
+            await LoginDB.UpdateLogin(login);
+
+            List<LoginModel> logins = await LoginDB.GetLogins();
+            for (int index = 0; index < logins.Count; index++)
+            {
+                if (logins[index].User_ID == CurrentInfo.Manager_ID)
+                {
+                    login = logins[index];
+                    break;
+                }
+            }
+
+            newPassword = oldPassword = confirmNewPassword = string.Empty;
+        }
+    }
+
+    private void CancelChange()
+    {
+        wrongPass = false;
+        misMatch = false;
+        isChangingPassword = false;
+    }
+
+}
