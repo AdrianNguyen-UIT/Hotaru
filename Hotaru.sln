@@ -5,9 +5,7 @@ VisualStudioVersion = 16.0.30011.22
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hotaru", "Hotaru\Hotaru.csproj", "{5D26363B-C367-4E60-A58A-76ACD0C53033}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hotaru.shared", "Hotaru.shared\Hotaru.shared.csproj", "{CFBA028E-3C9F-4C12-A50A-D95AC0A2CA59}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataAccessLibrary", "DataAccessLibrary\DataAccessLibrary.csproj", "{D6E076CF-A810-441C-8C83-A0B0B4000FC2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataAccessLibrary", "DataAccessLibrary\DataAccessLibrary.csproj", "{D6E076CF-A810-441C-8C83-A0B0B4000FC2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -19,10 +17,6 @@ Global
 		{5D26363B-C367-4E60-A58A-76ACD0C53033}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5D26363B-C367-4E60-A58A-76ACD0C53033}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5D26363B-C367-4E60-A58A-76ACD0C53033}.Release|Any CPU.Build.0 = Release|Any CPU
-		{CFBA028E-3C9F-4C12-A50A-D95AC0A2CA59}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{CFBA028E-3C9F-4C12-A50A-D95AC0A2CA59}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{CFBA028E-3C9F-4C12-A50A-D95AC0A2CA59}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{CFBA028E-3C9F-4C12-A50A-D95AC0A2CA59}.Release|Any CPU.Build.0 = Release|Any CPU
 		{D6E076CF-A810-441C-8C83-A0B0B4000FC2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{D6E076CF-A810-441C-8C83-A0B0B4000FC2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D6E076CF-A810-441C-8C83-A0B0B4000FC2}.Release|Any CPU.ActiveCfg = Release|Any CPU
