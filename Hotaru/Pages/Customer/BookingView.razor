@@ -45,14 +45,13 @@
                                     {
                                         if (hotelRoomStates[index].RoomState_Marked == true)
                                         {
-                                            string value = hotelRooms[index].Room_Number;
                                             if (index.ToString() == selectedIndex)
                                             {
-                                            <option value="@index.ToString()" selected>@value</option>
+                                            <option value="@index.ToString()" selected>@hotelRooms[index].Room_Number</option>
                                             }
                                             else
                                             {
-                                            <option value="@index.ToString()">@value</option>
+                                            <option value="@index.ToString()">@hotelRooms[index].Room_Number</option>
                                             }
                                         }
                                     }
@@ -161,13 +160,6 @@
                 break;
             }
         }
-        for (int roomIndex = 0; roomIndex < rooms.Count; roomIndex++)
-        {
-            if (rooms[roomIndex].Room_ID == reservation.Room_ID)
-            {
-                selectedIndex = roomIndex.ToString();
-            }
-        }
 
         for (int roomIndex = 0; roomIndex < rooms.Count; roomIndex++)
         {
@@ -195,6 +187,13 @@
             }
         }
 
+        for (int roomIndex = 0; roomIndex < hotelRooms.Count; roomIndex++)
+        {
+            if (hotelRooms[roomIndex].Room_ID == reservation.Room_ID)
+            {
+                selectedIndex = roomIndex.ToString();
+            }
+        }
         for (int paymentIndex = 0; paymentIndex < payments.Count; paymentIndex++)
         {
             if (payments[paymentIndex].Reservation_ID == reservation.Reservation_ID)

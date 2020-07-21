@@ -43,6 +43,7 @@
                                 }
                                 <label>Total:</label>
                                 <BSBasicInput InputType="InputType.Text" Value="total" IsDisabled="true"></BSBasicInput>
+                                <BSButton Class="p-3" Color=Color.Secondary Size=Size.ExtraSmall OnClick="@(() => Pay(object1))">Pay</BSButton>
                                 <BSButton Class="p-3" Color=Color.Primary Size=Size.ExtraSmall OnClick="@(() => EditBooking(object1))">Edit</BSButton>
                                 <BSButton Class="p-3" Color=Color.Danger Size=Size.ExtraSmall OnClick="@(() => CancelBooking(object1))">Cancel</BSButton>
                             </div>
@@ -68,6 +69,7 @@
                                 }
                                 <label>Total:</label>
                                 <BSBasicInput InputType="InputType.Text" Value="total" IsDisabled="true"></BSBasicInput>
+                                <BSButton Class="p-3" Color=Color.Secondary Size=Size.ExtraSmall OnClick="@(() => Pay(object1))">Pay</BSButton>
                                 <BSButton Class="p-3" Color=Color.Primary Size=Size.ExtraSmall OnClick="@(() => EditBooking(object2))">Edit</BSButton>
                                 <BSButton Class="p-3" Color=Color.Danger Size=Size.ExtraSmall OnClick="@(() => CancelBooking(object2))">Cancel</BSButton>
                             </div>
@@ -103,6 +105,7 @@
                                 }
                                 <label>Total:</label>
                                 <BSBasicInput InputType="InputType.Text" Value="total" IsDisabled="true"></BSBasicInput>
+                                <BSButton Class="p-3" Color=Color.Secondary Size=Size.ExtraSmall OnClick="@(() => Pay(object1))">Pay</BSButton>
                                 <BSButton Class="p-3" Color=Color.Primary Size=Size.ExtraSmall OnClick="@(() => EditBooking(object1))">Edit</BSButton>
                                 <BSButton Class="p-3" Color=Color.Danger Size=Size.ExtraSmall OnClick="@(() => CancelBooking(object1))">Cancel</BSButton>
                             </div>
@@ -128,6 +131,7 @@
                                 }
                                 <label>Total:</label>
                                 <BSBasicInput InputType="InputType.Text" Value="total" IsDisabled="true"></BSBasicInput>
+                                <BSButton Class="p-3" Color=Color.Secondary Size=Size.ExtraSmall OnClick="@(() => Pay(object1))">Pay</BSButton>
                                 <BSButton Class="p-3" Color=Color.Primary Size=Size.ExtraSmall OnClick="@(() => EditBooking(object2))">Edit</BSButton>
                                 <BSButton Class="p-3" Color=Color.Danger Size=Size.ExtraSmall OnClick="@(() => CancelBooking(object2))">Cancel</BSButton>
                             </div>
@@ -398,6 +402,30 @@
             }
         }
         await ReservationDB.DeleteReservation(reservations[num]);
+
+        await OnInitializedAsync();
+    }
+
+    private async Task Pay(int num)
+    {
+
+        for (int index = 0; index < payments.Count; index++)
+        {
+            if (payments[index].Reservation_ID == reservations[num].Reservation_ID)
+            {
+                PaymentModel paidPayment = new PaymentModel
+                {
+                    Payment_ID = payments[index].Payment_ID,
+                    Payment_Date = DateTime.Now,
+                    Payment_Total = payments[index].Payment_Total,
+                    Payment_Pay = true,
+                    Reservation_ID = payments[index].Reservation_ID
+                };
+
+                await PaymentDB.UpdatePayment(paidPayment);
+                break;
+            }
+        }
 
         await OnInitializedAsync();
     }
